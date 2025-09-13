@@ -10,20 +10,30 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('medications', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('patient_id')->unique();
-            $table->uuid('medical_dossier_id')->unique();
-            $table->string('name');
-            $table->string('dose');
-            $table->string('schedule');
-            $table->time('time');
-            $table->timestamps();
-            $table->softDeletes();
+            Schema::create('medications', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->uuid('patient_id'); // colonne pour la FK
+                $table->string('medication_name');
+                $table->string('dosage');
+                $table->string('unit');
+                $table->string('frequency');
+                $table->date('start_date');
+                $table->date('end_date')->nullable();
+                $table->time('reminder_schedule');
 
-            $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
-            $table->foreign('medical_dossier_id')->references('id')->on('medical_dossiers')->onDelete('cascade');
-        });
+                // Optionnels
+                $table->string('prescribed_by')->nullable();
+                $table->text('instructions')->nullable();
+                $table->text('possible_side_effects')->nullable();
+                $table->boolean('take_with_food')->nullable();
+                $table->boolean('as_needed_prn')->nullable();
+
+                $table->timestamps();
+                $table->softDeletes();
+                $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
+            
+});
+
     }
 
     /**

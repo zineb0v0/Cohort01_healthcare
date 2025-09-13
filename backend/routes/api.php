@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\PatientController;
+use App\Http\Controllers\API\MedicationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,4 +35,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', function () {
         return auth()->user()->profile;
     });
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Dashboard du patient
+    Route::get('/patient/dashboard', [PatientController::class, 'dashboard']);
+
+    // CRUD medications
+    Route::get('/patient/medications', [MedicationController::class, 'index']);
+    Route::post('/patient/medications', [MedicationController::class, 'store']);
+    Route::put('/patient/medications/{id}', [MedicationController::class, 'update']);
+    Route::delete('/patient/medications/{id}', [MedicationController::class, 'destroy']);
 });
