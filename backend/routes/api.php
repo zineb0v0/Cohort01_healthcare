@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\PatientController;
 use App\Http\Controllers\API\MedicationController;
+use App\Http\Controllers\API\MedicationIntakeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -46,4 +47,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/patient/medications', [MedicationController::class, 'store']);
     Route::put('/patient/medications/{id}', [MedicationController::class, 'update']);
     Route::delete('/patient/medications/{id}', [MedicationController::class, 'destroy']);
+    Route::put('/patient/medication-intakes/{id}/status', [MedicationIntakeController::class, 'updateStatus']);
+
 });

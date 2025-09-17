@@ -65,4 +65,12 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
+
+
+    protected function schedule(Schedule $schedule)
+      {
+          // Tous les 1ers du mois à minuit
+          $schedule->command('analytics:generate')->monthlyOn(1, '00:00');
+      }
+
 }

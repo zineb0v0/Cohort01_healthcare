@@ -19,7 +19,7 @@ return new class extends Migration {
                 $table->string('frequency');
                 $table->date('start_date');
                 $table->date('end_date')->nullable();
-                $table->time('reminder_schedule');
+                $table->string('reminder_schedule');
 
                 // Optionnels
                 $table->string('prescribed_by')->nullable();

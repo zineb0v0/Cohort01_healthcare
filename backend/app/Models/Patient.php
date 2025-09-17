@@ -41,4 +41,21 @@ class Patient extends Model
     {
         return $this->hasMany(Medication::class);
     }
+
+    public function dossier()
+    {
+        return $this->hasOne(MedicalDossier::class);
+    }
+
+    public function intakes()
+    {
+        return $this->hasMany(MedicationIntake::class);
+    }
+
+    public function analyses()
+    {
+        return $this->hasMany(MedicationAnalysis::class);
+    }
+
+    
 }
