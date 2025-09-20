@@ -12,11 +12,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // // Create 10 users with profiles
+        // \App\Models\User::factory(10)
+        //     ->has(\App\Models\Profile::factory())
+        //     ->create();
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // // Create 5 collaborators (each with a user)
+        // \App\Models\Collaborator::factory(5)->create();
+
+        // // Create 5 patients (each with a user)
+        // \App\Models\Patient::factory(5)->create();
+
+        // Create 10 appointments (each with related patient and collaborator)
+        \App\Models\Appointment::factory(5)->create();
     }
 }

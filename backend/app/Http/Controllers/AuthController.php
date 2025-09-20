@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -27,6 +26,11 @@ class AuthController extends Controller
             'date_birth' => 'nullable|date',
             'gender' => 'nullable|string|in:male,female,other',
             'emergency_contact' => 'nullable|string|max:20',
+            'role' => 'required|in:Patient,Collaborateur',
+            'urgency_number' => 'required_if:role,Patient|string|max:20', // specific au patient mais non required
+            'speciality' => 'required_if:role,Collaborateur|string|max:255', // Required if role is Collaborateur
+            'licenseNumber' => 'required_if:role,Collaborateur|string|max:255',
+            'workplace' => 'required_if:role,Collaborateur|string|max:255',
         ]);
 
         $user = User::create([
@@ -47,19 +51,34 @@ class AuthController extends Controller
             'emergency_contact' => $request->emergency_contact,
         ]);
 
-        // Vérifie ou crée les rôles
-        $roles = ['Patient', 'Collaborateur'];
-        foreach ($roles as $roleName) {
-            Role::firstOrCreate(['name' => $roleName]);
+        // Assigner le rôle
+        $role = $request->role;
+        Role::firstOrCreate(['name' => $role]);
+        $user->assignRole($role);
+
+
+         //  Si Patient
+        if ($role === 'Patient') {
+            $user->patient()->create([
+                'urgency_number' => $request->urgency_number ?? null,
+            ]);
         }
 
-        // Assigne un rôle aléatoire
-        $user->assignRole(Arr::random($roles));
+        // Si Collaborateur
+        if ($role === 'Collaborateur') {
+            $user->collaborator()->create([
+                'speciality' => $request->speciality,
+                'licenseNumber' => $request->licenseNumber,
+                'workplace' => $request->workplace,
+            ]);
+        }
+
 
         // Création du token
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
+            'message' => 'User registered successfully',
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user->load('profile'), // inclut le profile dans la réponse
