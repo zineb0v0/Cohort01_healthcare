@@ -4,8 +4,10 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Notification;
 use App\Http\Controllers\Controller;
+use App\Mail\AppointmentStatusMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class CollaboratorController extends Controller
 {
@@ -19,7 +21,9 @@ class CollaboratorController extends Controller
             return response()->json(['error' => 'Collaborator not found for this user.'], 404);
         }
 
-        $appointments = $collaborator->appointments()->with(['patient', 'collaborator'])->get();
+        $appointments = $collaborator->appointments()
+            ->with(['patient.user.profile', 'collaborator.user.profile'])
+            ->get();
         return response()->json($appointments);
     }
 
@@ -47,7 +51,10 @@ class CollaboratorController extends Controller
             return response()->json(['error' => 'Collaborator not found for this user.'], 404);
         }
 
-        $appointment = $collaborator->appointments()->where('id', $appointmentId)->first();
+        $appointment = $collaborator->appointments()
+            ->with(['patient.user.profile', 'collaborator.user.profile'])
+            ->where('id', $appointmentId)
+            ->first();
 
         if (!$appointment) {
             return response()->json(['error' => 'Appointment not found or does not belong to this collaborator.'], 404);
@@ -55,6 +62,15 @@ class CollaboratorController extends Controller
 
         $appointment->status = 'confirmed';
         $appointment->save();
+
+        if($appointment->patient && $appointment->patient->user && $appointment->patient->user->email) {
+            try {
+                Mail::to($appointment->patient->user->email)
+                    ->send(new AppointmentStatusMail($appointment, 'confirmed'));
+            } catch (\Exception $e) {
+                Log::error('Failed to send appointment confirmation email: ' . $e->getMessage());
+            }
+        }
 
         return response()->json(['message' => 'Appointment confirmed successfully.', 'appointment' => $appointment]);
     }
@@ -69,7 +85,10 @@ class CollaboratorController extends Controller
             return response()->json(['error' => 'Collaborator not found for this user.'], 404);
         }
 
-        $appointment = $collaborator->appointments()->where('id', $appointmentId)->first();
+        $appointment = $collaborator->appointments()
+            ->with(['patient.user.profile', 'collaborator.user.profile'])
+            ->where('id', $appointmentId)
+            ->first();
 
         if (!$appointment) {
             return response()->json(['error' => 'Appointment not found or does not belong to this collaborator.'], 404);
@@ -77,6 +96,15 @@ class CollaboratorController extends Controller
 
         $appointment->status = 'canceled';
         $appointment->save();
+
+        if ($appointment->patient && $appointment->patient->user && $appointment->patient->user->email) {
+            try {
+                Mail::to($appointment->patient->user->email)
+                    ->send(new AppointmentStatusMail($appointment, 'canceled'));
+            } catch (\Exception $e) {
+                Log::error('Failed to send appointment cancellation email: ' . $e->getMessage());
+            }
+        }
 
         return response()->json(['message' => 'Appointment canceled successfully.', 'appointment' => $appointment]);
     }
@@ -91,7 +119,10 @@ class CollaboratorController extends Controller
             return response()->json(['error' => 'Collaborator not found for this user.'], 404);
         }
 
-        $appointment = $collaborator->appointments()->where('id', $appointmentId)->first();
+        $appointment = $collaborator->appointments()
+            ->with(['patient.user.profile', 'collaborator.user.profile'])
+            ->where('id', $appointmentId)
+            ->first();
 
         if (!$appointment) {
             return response()->json(['error' => 'Appointment not found or does not belong to this collaborator.'], 404);
@@ -105,6 +136,15 @@ class CollaboratorController extends Controller
         $appointment->date = $request->input('date');
         $appointment->time = $request->input('time');
         $appointment->save();
+
+        if($appointment->patient && $appointment->patient->user && $appointment->patient->user->email) {
+            try {
+                Mail::to($appointment->patient->user->email)
+                    ->send(new AppointmentStatusMail($appointment, 'updated'));
+            } catch (\Exception $e) {
+                Log::error('Failed to send appointment update email: ' . $e->getMessage());
+            }
+        }
 
         return response()->json(['message' => 'Appointment updated successfully.', 'appointment' => $appointment]);
     }

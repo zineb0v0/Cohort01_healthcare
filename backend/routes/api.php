@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AppointmentController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CollaboratorController;
 
@@ -44,4 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/collaborator/appointments/{appointmentId}', [CollaboratorController::class, 'updateAppointment']);
     Route::get('/collaborator/profile', [CollaboratorController::class, 'getCollaboratorProfile']);
     Route::put('/collaborator/profile', [CollaboratorController::class, 'updateCollaboratorProfile']);
+
+    Route::prefix('appointments')->group(function () {
+        // PATIENT SIDE
+        Route::post('/', [AppointmentController::class, 'store']);       // Book appointment
+        Route::get('/', [AppointmentController::class, 'index']);        // List patient appointments
+        Route::delete('/{id}', [AppointmentController::class, 'destroy']); // Cancel appointment
+    });
 });
