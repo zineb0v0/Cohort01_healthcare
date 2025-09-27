@@ -4,6 +4,8 @@ use App\Http\Controllers\API\AppointmentController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CollaboratorController;
 
+use App\Http\Controllers\API\PatientController;
+use App\Http\Controllers\API\MedicationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -52,4 +54,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [AppointmentController::class, 'index']);        // List patient appointments
         Route::delete('/{id}', [AppointmentController::class, 'destroy']); // Cancel appointment
     });
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Dashboard du patient
+    Route::get('/patient/dashboard', [PatientController::class, 'dashboard']);
+
+    // CRUD medications
+    Route::get('/patient/medications', [MedicationController::class, 'index']);
+    Route::post('/patient/medications', [MedicationController::class, 'store']);
+    Route::put('/patient/medications/{id}', [MedicationController::class, 'update']);
+    Route::delete('/patient/medications/{id}', [MedicationController::class, 'destroy']);
 });
