@@ -41,4 +41,20 @@ class Patient extends Model
     {
         return $this->hasMany(Medication::class);
     }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'patient_id', 'id');
+    }
+
+    public function pendingAppointments()
+    {
+        return $this->appointments()->pending();
+    }
+
+    public function confirmedAppointments()
+    {
+        return $this->appointments()->confirmed();
+    }
+
 }

@@ -14,6 +14,13 @@ class Collaborator extends Model
 
     protected $dates = ['deleted_at'];
 
+    protected $fillable = [
+        'user_id',
+        'speciality',
+        'license_number',
+        'workplace',
+    ];
+
     protected static function boot(): void
     {
         parent::boot();
@@ -27,5 +34,10 @@ class Collaborator extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
     }
 }
