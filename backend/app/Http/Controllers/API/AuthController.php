@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use App\Models\User;
@@ -19,7 +20,7 @@ use Spatie\Permission\Models\Role;
 class AuthController extends Controller
 {
     // Enregistrement
-
+/*
     public function register(Request $request)
     {
         // Validation des champs
@@ -91,7 +92,85 @@ class AuthController extends Controller
             'user' => $user->load('profile'), // inclut le profile dans la réponse
         ]);
     }
-    
+*/
+public function register(Request $request)
+{
+    try {
+        // Validation des champs
+        $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6|confirmed',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'date_birth' => 'nullable|date',
+            'gender' => 'nullable|string|in:male,female,other',
+            'emergency_contact' => 'nullable|string|max:20',
+            'role' => 'required|in:Patient,Collaborateur',
+            'urgency_number' => 'required_if:role,Patient|string|max:20',
+            'speciality' => 'required_if:role,Collaborateur|string|max:255',
+            'licenseNumber' => 'required_if:role,Collaborateur|string|max:255',
+            'workplace' => 'required_if:role,Collaborateur|string|max:255',
+        ]);
+
+        $user = User::create([
+            'id' => Str::uuid(),
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $user->profile()->create([
+            'id' => Str::uuid(),
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'date_birth' => $request->date_birth,
+            'gender' => $request->gender,
+            'emergency_contact' => $request->emergency_contact,
+        ]);
+
+        // Assigner le rôle
+        $role = $request->role;
+        Role::firstOrCreate(['name' => $role]);
+        $user->assignRole($role);
+
+        if ($role === 'Patient') {
+            $user->patient()->create([
+                'urgency_number' => $request->urgency_number ?? null,
+            ]);
+        }
+
+        if ($role === 'Collaborateur') {
+            $user->collaborator()->create([
+                'speciality' => $request->speciality,
+                'licenseNumber' => $request->licenseNumber,
+                'workplace' => $request->workplace,
+            ]);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'User registered successfully',
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user->load('profile'),
+        ]);
+    } catch (\Exception $e) {
+        // Log the error with full details
+        Log::error('User registration failed', [
+            'error' => $e->getMessage(),
+            'stack' => $e->getTraceAsString(),
+            'request_data' => $request->all(),
+        ]);
+
+        return response()->json([
+            'message' => 'Registration failed, check logs for details',
+        ], 500);
+    }
+}
    
     // Login
     public function login(Request $request)

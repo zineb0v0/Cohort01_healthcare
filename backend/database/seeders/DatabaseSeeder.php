@@ -19,4 +19,11 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
     }
-}
+    /*$patientUser = App\Models\User::create([
+    'email' => 'john.patient@test.com',
+    'password' => bcrypt('password123'),
+    'email_verified_at' => now(),
+    // Add other fields that actually exist in your table
+    ]);
+    */
+    }
