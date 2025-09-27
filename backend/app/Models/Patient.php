@@ -5,18 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
+
 use Illuminate\Support\Str;
 
 class Patient extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
+    use Notifiable;
 
-    protected $keyType = 'string';
+    protected $table = 'patients';
+    protected $primaryKey = 'id';
     public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'user_id',
-        'urgency_number',
+        'id', 'user_id',
+        'urgencyNumber'
     ];
 
     protected static function boot(): void
@@ -40,5 +46,9 @@ class Patient extends Model
     public function medications()
     {
         return $this->hasMany(Medication::class);
+    }
+
+    public function appointments() {
+        return $this->hasMany(Appointment::class);
     }
 }
