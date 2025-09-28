@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -14,9 +13,9 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
+    // Enregistrement
     public function register(Request $request)
     {
-        // Validation des champs
         $request->validate([
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
@@ -27,15 +26,21 @@ class AuthController extends Controller
             'date_birth' => 'nullable|date',
             'gender' => 'nullable|string|in:male,female,other',
             'emergency_contact' => 'nullable|string|max:20',
+            'role' => 'required|in:Patient,Collaborateur',
+            'urgency_number' => 'required_if:role,Patient|string|max:20', // specific au patient mais non required
+            'speciality' => 'required_if:role,Collaborateur|string|max:255', // Required if role is Collaborateur
+            'licenseNumber' => 'required_if:role,Collaborateur|string|max:255',
+            'workplace' => 'required_if:role,Collaborateur|string|max:255',
         ]);
 
+        // 1. Création du user
         $user = User::create([
-            'id' => Str::uuid(), // uniquement si 'id' est UUID dans la table
+            'id' => Str::uuid(),
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        // Création du Profile lié au User
+        // 2. Création du profile
         $user->profile()->create([
             'id' => Str::uuid(),
             'first_name' => $request->first_name,
@@ -47,22 +52,37 @@ class AuthController extends Controller
             'emergency_contact' => $request->emergency_contact,
         ]);
 
-        // Vérifie ou crée les rôles
-        $roles = ['Patient', 'Collaborateur'];
-        foreach ($roles as $roleName) {
-            Role::firstOrCreate(['name' => $roleName]);
+        // Assigner le rôle
+        $role = $request->role;
+        Role::firstOrCreate(['name' => $role]);
+        $user->assignRole($role);
+
+
+         //  Si Patient
+        if ($role === 'Patient') {
+            $user->patient()->create([
+                'urgency_number' => $request->urgency_number ?? null,
+            ]);
         }
 
-        // Assigne un rôle aléatoire
-        $user->assignRole(Arr::random($roles));
+        // Si Collaborateur
+        if ($role === 'Collaborateur') {
+            $user->collaborator()->create([
+                'speciality' => $request->speciality,
+                'licenseNumber' => $request->licenseNumber,
+                'workplace' => $request->workplace,
+            ]);
+        }
+
 
         // Création du token
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
+            'message' => 'User registered successfully',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user->load('profile'), // inclut le profile dans la réponse
+            'user' => $user->load(['profile', 'patient']),
         ]);
     }
 
@@ -77,7 +97,9 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages(['email' => ['The provided credentials are incorrect.']]);
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.']
+            ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -90,6 +112,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->getRoleNames(),
                 'profile' => $user->profile,
+                'patient' => $user->patient,
             ],
         ]);
     }
@@ -97,10 +120,9 @@ class AuthController extends Controller
     // Logout
     public function logout(Request $request)
     {
-        /** @var \Laravel\Sanctum\PersonalAccessToken $token */
         $token = $request->user()->currentAccessToken();
         if ($token) {
-            $token->delete(); // only called if $token exists
+            $token->delete();
         }
 
         return response()->json(['message' => 'Successfully logged out']);
@@ -114,29 +136,31 @@ class AuthController extends Controller
             'email' => $request->user()->email,
             'role' => $request->user()->getRoleNames(),
             'profile' => $request->user()->profile,
+            'patient' => $request->user()->patient,
         ]);
     }
 
+    // Update Profile
     public function updateProfile(Request $request)
     {
         $user = $request->user();
 
         $data = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:6|confirmed',
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
             'phone' => 'sometimes|string|max:20',
             'address' => 'sometimes|string|max:255',
-            'date_birth' => 'sometimes|date|before:today', ]);
+            'date_birth' => 'sometimes|date|before:today',
+        ]);
 
-        // Update user
         $user->update($data);
 
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user' => $user,
+            'user' => $user->load(['profile', 'patient']),
         ]);
     }
 }

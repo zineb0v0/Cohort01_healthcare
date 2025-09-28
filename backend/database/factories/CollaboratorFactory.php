@@ -17,6 +17,14 @@ class CollaboratorFactory extends Factory
     public function definition(): array
     {
         return [
+            'id' => $this->faker->uuid(),
+            'user_id' => \App\Models\User::factory(),
+            'speciality' => $this->faker->word(),
+            'licenseNumber' => $this->faker->bothify('LIC-####'),
+            'workplace' => $this->faker->company(),
+            'isAvailable' => $this->faker->boolean(),
+            'availability' => $this->faker->randomElement(['morning', 'afternoon', 'evening']),
+            'rating' => $this->faker->randomFloat(1, 0, 5),
         ];
     }
 }
