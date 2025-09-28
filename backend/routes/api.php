@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AnalysisController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,16 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+/* Route::get(  '/upload', function() {
+  //  return view('upload');
+//});
+//Route::post('/upload', [AnalysisController::class, 'store'])->name('analyses.store');
+*/
+
+Route::post('/analyses', [AnalysisController::class, 'store']);
+Route::get('/analyses', [AnalysisController::class, 'index']);
+Route::delete('/analyses/{id}', [AnalysisController::class, 'destroy']);
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -34,3 +45,5 @@ Route::middleware('auth:sanctum')->group(function () {
         return auth()->user()->profile;
     });
 });
+
+

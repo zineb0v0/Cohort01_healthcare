@@ -14,12 +14,9 @@ return [
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
     */
-
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
-
-    'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['*'],
+'paths' => ['api/*'],
+'allowed_methods' => ['*'],
+'allowed_origins' => ['http://localhost:5173'], // Vite port
 
     'allowed_origins_patterns' => [],
 
