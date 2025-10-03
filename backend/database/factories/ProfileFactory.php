@@ -26,8 +26,8 @@ class ProfileFactory extends Factory
             'phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),
             'date_birth' => $this->faker->date(),
-            'gender' => $this->faker->randomElement(['male', 'female', 'other']),
-            'emergency_contact' => $this->faker->phoneNumber(),
+            'gender' => $this->faker->randomElement(['homme', 'femme']),
+            'urgency_number' => $this->faker->phoneNumber(),
         ];
     }
 }

@@ -15,11 +15,11 @@ return new class extends Migration {
             $table->uuid('user_id');
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('phone')->nullable();
-            $table->string('address')->nullable();
-            $table->date('date_birth')->nullable();
-            $table->enum('gender', ['male', 'female', 'other'])->nullable();
-            $table->string('emergency_contact')->nullable();
+            $table->string('phone');
+            $table->string('address');
+            $table->date('date_birth');
+            $table->enum('gender', ['homme', 'femme']);
+            $table->string('urgency_number')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

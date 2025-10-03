@@ -17,7 +17,6 @@ class Patient extends Model
 
     protected $fillable = [
         'user_id',
-        'urgency_number',
     ];
 
     protected static function boot(): void
@@ -41,5 +40,28 @@ class Patient extends Model
     public function medications()
     {
         return $this->hasMany(Medication::class);
+    }
+
+    public function dossier()
+    {
+        return $this->hasOne(MedicalDossier::class);
+    }
+
+    public function intakes()
+    {
+        return $this->hasMany(MedicationIntake::class);
+    }
+
+    public function analyses()
+    {
+        return $this->hasMany(MedicationAnalysis::class);
+    }
+        public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'patient_id', 'patient_id');
+    }
+       public function labReports()
+    {
+        return $this->hasMany(LabReport::class, 'patient_id', 'patient_id');
     }
 }

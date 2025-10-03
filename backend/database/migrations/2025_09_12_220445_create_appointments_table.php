@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->uuid('collaborator_id');
             $table->uuid('medical_dossier_id');
             $table->dateTime('date');            // date et heure du rendez-vous
-            $table->time('start_time')->nullable();
+            $table->time('time')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'canceled'])->default('pending');
             $table->boolean('is_telehealth')->default(false);
             $table->string('telehealth_url')->nullable();

@@ -13,7 +13,6 @@ return new class extends Migration {
         Schema::create('patients', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id');
-            $table->string('urgency_number')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
