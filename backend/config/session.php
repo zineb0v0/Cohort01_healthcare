@@ -3,7 +3,6 @@
 use Illuminate\Support\Str;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Session Driver
@@ -196,7 +195,7 @@ return [
     |
     */
 
-    'same_site' => 'lax',
+    'same_site' => env('SESSION_SAME_SITE'),  // Default to 'lax' if not defined
 
     /*
     |--------------------------------------------------------------------------
@@ -210,5 +209,4 @@ return [
     */
 
     'partitioned' => false,
-
 ];

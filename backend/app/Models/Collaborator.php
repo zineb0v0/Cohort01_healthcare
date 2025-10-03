@@ -25,26 +25,34 @@ class Collaborator extends Model
         'speciality',
         'license_number',
         'workplace',
+        'is_available',
         'availability',
         'rating',
     ];
 
-    protected static function booted()
+    protected static function boot(): void
     {
-        static::creating(function ($collaborator) {
-            if (!$collaborator->id) {
-                $collaborator->id = (string) Str::uuid();
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = Str::uuid()->toString();
             }
         });
     }
 
-    public function setRatingAttribute($value)
-    {
-        $this->attributes['rating'] = $value >= 0 && $value <= 100 ? $value : 0;
-    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    public function patients()
+    {
+        return $this->hasManyThrough(Patient::class, Appointment::class, 'collaborator_id', 'id', 'id', 'patient_id');
     }
 }

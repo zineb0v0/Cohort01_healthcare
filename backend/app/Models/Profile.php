@@ -21,7 +21,7 @@ class Profile extends Model
         'address',
         'date_birth',
         'gender',
-        'emergency_contact',
+        'urgency_number',
     ];
 
     protected static function boot(): void

@@ -54,6 +54,7 @@ class Kernel extends HttpKernel
      */
     protected $middlewareAliases = [
         'auth' => Middleware\Authenticate::class,
+        'role' => Middleware\CheckRole::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
@@ -67,10 +68,10 @@ class Kernel extends HttpKernel
     ];
 
 
-    protected function schedule(Schedule $schedule)
-      {
-          // Tous les 1ers du mois à minuit
-          $schedule->command('analytics:generate')->monthlyOn(1, '00:00');
-      }
+    // protected function schedule(Schedule $schedule)
+    //   {
+    //       // Tous les 1ers du mois à minuit
+    //       $schedule->command('analytics:generate')->monthlyOn(1, '00:00');
+    //   }
 
 }

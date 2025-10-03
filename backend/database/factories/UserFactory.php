@@ -21,7 +21,6 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'password' => Hash::make('password'), // mot de passe par défaut
         ];
@@ -37,8 +36,8 @@ class UserFactory extends Factory
                 'phone' => $this->faker->phoneNumber(),
                 'address' => $this->faker->address(),
                 'date_birth' => $this->faker->date(),
-                'gender' => $this->faker->randomElement(['male', 'female', 'other']),
-                'emergency_contact' => $this->faker->phoneNumber(),
+                'gender' => $this->faker->randomElement(['homme', 'femme']),
+                'urgency_number' => $this->faker->phoneNumber(),
             ]);
         });
     }

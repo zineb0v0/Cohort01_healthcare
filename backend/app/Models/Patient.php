@@ -9,14 +9,14 @@ use Illuminate\Support\Str;
 
 class Patient extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
         'user_id',
-        'urgency_number',
     ];
 
     protected static function boot(): void
@@ -56,6 +56,12 @@ class Patient extends Model
     {
         return $this->hasMany(MedicationAnalysis::class);
     }
-
-    
+        public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'patient_id', 'patient_id');
+    }
+       public function labReports()
+    {
+        return $this->hasMany(LabReport::class, 'patient_id', 'patient_id');
+    }
 }

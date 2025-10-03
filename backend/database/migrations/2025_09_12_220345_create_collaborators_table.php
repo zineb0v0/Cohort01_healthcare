@@ -17,8 +17,9 @@ return new class extends Migration {
             $table->string('speciality');
             $table->string('license_number');
             $table->string('workplace');
+            $table->boolean('is_available')->default(true);
             $table->string('availability')->nullable();
-            $table->decimal('rating', 4, 2)->unsigned()->nullable(); // only positive nums 0.00 to 99.99
+            $table->decimal('rating', 5, 2)->unsigned()->default(0); // only positive nums 0.00 to 100.00
             $table->timestamps();
             $table->softDeletes();
 
