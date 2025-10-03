@@ -82,31 +82,6 @@ class AuthController extends Controller
         ]);
     }
 
-    // // Login
-    // public function login(Request $request)
-    // {
-    //     $request->validate([
-    //         'email' => 'required|email',
-    //         'password' => 'required|string',
-    //     ]);
-    //     if (!Auth::attempt($request->only('email', 'password'))) {
-    //         throw ValidationException::withMessages(['message' => ['The provided credentials are incorrect.']]);
-    //     }
-    //     $user = User::where('email', $request->email)->firstOrFail();
-
-    //     $token = $user->createToken('auth_Token')->plainTextToken;
-    //     $role = $user->getRoleNames()->first();  // This will return the first role name (Patient, Collaborateur, etc.)
-
-    //     return response()->json([
-    //         'message' => 'Connexion avec succès',
-    //         'access_token' => $token,
-    //         'role' => $role,  // Role of the user
-    //         'user' => $user->load(['profile', 'patient', 'collaborator']),  // Load related models (including profile)
-    //         'profile' => optional($user->profile),  // Optional relationship (Profile)
-    //         'patient' => optional($user->patient),  // Optional relationship (Patient)
-    //         'collaborator' => optional($user->collaborator),  // Optional relationship (Collaborator)
-    //     ]);
-    // }
     public function login(Request $request)
     {
         // Validate the request data
