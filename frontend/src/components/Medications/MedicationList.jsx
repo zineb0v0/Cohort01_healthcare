@@ -1,4 +1,6 @@
-function MedicationList({ medications, onEdit, onDelete, loading }) {
+import { Edit, Trash2 } from 'lucide-react';
+
+export default function MedicationList({ medications, onEdit, onDelete, loading }) {
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6">
