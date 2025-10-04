@@ -87,17 +87,16 @@ class AnalysisController extends Controller
     }
 
     // ✅ Générer PDF du résultat
-    $pdf = Pdf::loadHTML('<h1>Résultat d\'analyse</h1><p>' . nl2br($result) . '</p>');
-    $resultPath = 'public/results/result_' . time() . '.pdf';
-    Storage::put($resultPath, $pdf->output());
+$pdf = Pdf::loadHTML('<h1>Résultat d\'analyse</h1><p>' . nl2br($result) . '</p>');
+$resultPath = 'public/results/result_' . time() . '.pdf';
+Storage::put($resultPath, $pdf->output());
+$analysis = Analysis::create([
+    'filename' => $filepath,
+    'type' => $type,
+    'result' => $result,
+    'result_file' => Storage::url($resultPath),
+]);
 
-    // ✅ Sauvegarde en DB
-    $analysis = Analysis::create([
-        'filename' => $filepath,
-        'type' => $type,
-        'result' => $result,
-        'result_file' => $resultPath, // Nouveau champ pour le PDF
-    ]);
 
     // ✅ Retour JSON propre
     return response()->json([
