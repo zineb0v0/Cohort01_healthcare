@@ -55,7 +55,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/collaborator/appointments/{appointmentId}', [\App\Http\Controllers\CollaboratorController::class, 'updateAppointment']);
     Route::get('/collaborator/profile', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorProfile']);
     Route::put('/collaborator/profile', [\App\Http\Controllers\CollaboratorController::class, 'updateCollaboratorProfile']);
-
    });
 
 Route::middleware('auth:sanctum')->group(function () {

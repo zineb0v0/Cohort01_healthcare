@@ -3,19 +3,18 @@ import {
   FaCalendarAlt,
   FaPills,
   FaFileMedical,
-  FaCog,
   FaSignOutAlt,
   FaHome,
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import api from "../lib/axios.js";
 
 export default function PatientSidebar() {
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
 
-  // 🔹 جلب معلومات المريض من backend
+  // 🔹 Charger le profil du patient
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -23,17 +22,13 @@ export default function PatientSidebar() {
         if (!token) return console.warn("⚠️ Aucun token trouvé dans le localStorage");
 
         const res = await api.get("/api/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         setProfile(res.data);
       } catch (err) {
         console.error("Erreur lors du chargement du profil:", err);
       }
     };
-
     fetchProfile();
   }, []);
 
@@ -44,15 +39,10 @@ export default function PatientSidebar() {
       await api.post(
         "/api/logout",
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       localStorage.removeItem("token");
-      navigate("/login"); // ✅ correction: "/login" au lieu de "/api/login"
+      navigate("/login");
     } catch (err) {
       console.error("Erreur lors de la déconnexion:", err);
     }
@@ -68,40 +58,75 @@ export default function PatientSidebar() {
 
         {/* 🔹 Navigation */}
         <nav className="mt-2 space-y-2">
-          <a
-            href="#"
-            className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+          <NavLink
+            to="/patient"
+            end
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 rounded-lg ${
+                isActive
+                  ? "bg-blue-100 text-blue-900 font-semibold"
+                  : "text-gray-900 hover:bg-blue-50 hover:text-blue-600"
+              }`
+            }
           >
             <FaHome /> Tableau de bord
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+          </NavLink>
+
+          <NavLink
+            to="/patient/profil"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 rounded-lg ${
+                isActive
+                  ? "bg-blue-100 text-blue-900 font-semibold"
+                  : "text-gray-900 hover:bg-blue-50 hover:text-blue-600"
+              }`
+            }
           >
             <FaUser /> Mon profil
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+          </NavLink>
+
+          <NavLink
+            to="/patient/rendezvous"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 rounded-lg ${
+                isActive
+                  ? "bg-blue-100 text-blue-900 font-semibold"
+                  : "text-gray-900 hover:bg-blue-50 hover:text-blue-600"
+              }`
+            }
           >
             <FaCalendarAlt /> Rendez-vous
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+          </NavLink>
+
+          <NavLink
+            to="/patient/medicaments"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 rounded-lg ${
+                isActive
+                  ? "bg-blue-100 text-blue-900 font-semibold"
+                  : "text-gray-900 hover:bg-blue-50 hover:text-blue-600"
+              }`
+            }
           >
             <FaPills /> Médicaments
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+          </NavLink>
+
+          <NavLink
+            to="/patient/rapports"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 rounded-lg ${
+                isActive
+                  ? "bg-blue-100 text-blue-900 font-semibold"
+                  : "text-gray-900 hover:bg-blue-50 hover:text-blue-600"
+              }`
+            }
           >
             <FaFileMedical /> Rapports médicaux
-          </a>
+          </NavLink>
         </nav>
       </div>
 
-      {/* 🔹 User Info + Déconnexion */}
+      {/* 🔹 Profil + Déconnexion */}
       <div className="border-t p-6 space-y-3">
         <div className="flex items-center gap-3">
           <img
@@ -113,18 +138,14 @@ export default function PatientSidebar() {
           />
           <div>
             <p className="text-gray-800 font-medium">
-              {profile ? `${profile.first_name} ${profile.last_name}` : "Chargement..."}
+                {profile 
+                ? `${profile.first_name} ${profile.last_name}`
+                : "Chargement..."}
             </p>
             <p className="text-sm text-gray-500">Patient</p>
           </div>
         </div>
 
-        <a
-          href="#"
-          className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
-        >
-          <FaCog /> Paramètres
-        </a>
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-100 rounded-lg w-full text-left"

@@ -1,45 +1,37 @@
 import { useEffect, useState } from "react";
-import { FaSignOutAlt, FaHome } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaSignOutAlt, FaHome, FaCalendarAlt, FaUser } from "react-icons/fa";
+import { NavLink, useNavigate } from "react-router-dom";
 import api from "../lib/axios.js";
 
 export default function Sidebar() {
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
 
-  // 🔸 جلب معلومات الطبيب
+  // 🔹 Charger le profil du collaborateur
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token"); // تأكدي أنه كيتسجل عند login
+        const token = localStorage.getItem("token");
         const res = await api.get("/api/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setProfile(res.data);
       } catch (err) {
         console.error("Erreur lors du chargement du profil:", err);
       }
     };
-
     fetchProfile();
   }, []);
 
-  // 🔸 Déconnexion
+  // 🔹 Déconnexion
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
       await api.post(
         "/api/logout",
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       localStorage.removeItem("token");
       navigate("/login");
     } catch (err) {
@@ -49,38 +41,61 @@ export default function Sidebar() {
 
   return (
     <div className="h-screen w-64 bg-white shadow-lg flex flex-col justify-between overflow-y-auto">
-      {/* Logo */}
+      {/* 🔹 Logo */}
       <div>
-        <div className="p-5 ">
-          <img
-            src="/logo1.webp"
-            alt="Logo Echo"
-            className="h-20 w-[200px]"
-          />
+        <div className="p-5">
+          <img src="/logo1.webp" alt="Logo Echo" className="h-20 w-[200px]" />
         </div>
 
-        {/* Navigation */}
+        {/* 🔹 Navigation */}
         <nav className="mt-2 space-y-2">
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg">
+          <NavLink
+            to="/collaborator"
+            end
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 rounded-lg ${
+                isActive
+                  ? "bg-blue-100 text-blue-700 font-semibold"
+                  : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+              }`
+            }
+          >
             <FaHome /> Tableau de bord
-          </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg">
-            📅 Rendez-vous
-          </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg">
-            👥 Patients
-          </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg">
-            ⚙️ Profil
-          </a>
+          </NavLink>
+
+          <NavLink
+            to="/collaborator/rendezvous"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 rounded-lg ${
+                isActive
+                  ? "bg-blue-100 text-blue-700 font-semibold"
+                  : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+              }`
+            }
+          >
+            <FaCalendarAlt /> Rendez-vous
+          </NavLink>
+
+          <NavLink
+            to="/collaborator/profile"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 rounded-lg ${
+                isActive
+                  ? "bg-blue-100 text-blue-700 font-semibold"
+                  : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+              }`
+            }
+          >
+            <FaUser /> Profil
+          </NavLink>
         </nav>
       </div>
 
-      {/* User Info & Logout */}
+      {/* 🔹 Informations utilisateur + Déconnexion */}
       <div className="border-t p-6 space-y-3">
         <div className="flex items-center gap-3">
           <img
-            src={`https://ui-avatars.com/api/?name=${profile?.first_name}+${profile?.last_name}`}
+            src={`https://ui-avatars.com/api/?name=${profile?.first_name || "User"}+${profile?.last_name || ""}`}
             alt="User Avatar"
             className="w-10 h-10 rounded-full"
           />
