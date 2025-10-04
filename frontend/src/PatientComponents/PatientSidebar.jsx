@@ -28,9 +28,7 @@ export default function Sidebar() {
           <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg">
             <FaPills /> Médicaments
           </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg">
-            <FaRobot /> Assistant IA
-          </a>
+         
           <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg">
             <FaFileMedical /> Rapports médicaux
           </a>
