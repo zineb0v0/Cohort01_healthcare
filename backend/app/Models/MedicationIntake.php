@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class MedicationIntake extends Model
 {
     use HasFactory;
-
+    protected $table = 'medication_intakes'; // Forcer le nom de la table
     protected $keyType = 'string';
     public $incrementing = false;
 
@@ -18,7 +18,7 @@ class MedicationIntake extends Model
         'medication_id',
         'scheduled_time',
         'taken_time',
-        'is_taken',
+        'status'
     ];
 
       protected static function boot()
@@ -39,6 +39,6 @@ class MedicationIntake extends Model
 
     public function medication()
     {
-        return $this->belongsTo(Medication::class);
+        return $this->belongsTo(Medication::class, 'medication_id', 'id');
     }
 }

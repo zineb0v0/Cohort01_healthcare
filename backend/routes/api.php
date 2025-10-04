@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/patient/medications', [MedicationController::class, 'store']);
     Route::put('/patient/medications/{id}', [MedicationController::class, 'update']);
     Route::delete('/patient/medications/{id}', [MedicationController::class, 'destroy']);
+    Route::get('/patient/today-intakes', [MedicationIntakeController::class, 'todayIntakes']);
     Route::put('/patient/medication-intakes/{id}/status', [MedicationIntakeController::class, 'updateStatus']);
 
 });
