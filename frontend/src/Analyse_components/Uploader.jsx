@@ -36,7 +36,7 @@ export default function Uploader({ onUploaded }) {
       <div className="absolute top-6 right-6">
         <button
           onClick={() => setIsOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+          className="px-4 py-2 bg-blue-800 text-white rounded-lg shadow hover:bg-blue-700 transition"
         >
         📂 Upload a File
 
@@ -78,7 +78,7 @@ export default function Uploader({ onUploaded }) {
               <button
                 onClick={handleUpload}
                 disabled={loading || !file}
-                className={`flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition ${
+                className={`flex-1 px-3 py-2 bg-blue-300 text-white rounded-lg hover:bg-blue-700 transition ${
                   loading || !file ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >

@@ -17,7 +17,7 @@ export default function AnalysisCard({ analysis, onDelete }) {
 
   const handleDownload = () => {
   if (!analysis.result_file) return alert("Résultat non disponible !");
-  const url = `http://127.0.0.1:8000/storage/${analysis.result_file.replace('public/', '')}`;
+  const url = `http://127.0.0.1:8000/${analysis.result_file.replace('public/', '')}`;
   window.open(url, "_blank");
 };
 

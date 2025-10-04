@@ -3,7 +3,7 @@ import api from "../lib/axios";
 import Uploader from "./Uploader";
 import AnalysisCard from "./AnalysisCard";
 
-export default function Dashboard() {
+export default function AnalysePage() {
   const [analyses, setAnalyses] = useState([]);
 
   useEffect(() => {
@@ -23,10 +23,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#F8FBFE]">
+    <div className="relative min-h-screen bg-[#c8e0f8] pl-2 pr-2">
       <Uploader onUploaded={handleUploaded} />
 
-      <div className="flex flex-wrap justify-center items-center min-h-screen gap-6 pt-24">
+      <div className="flex flex-wrap  min-h-screen gap-2 pt-19">
   {analyses.map((analysis) => (
     <AnalysisCard
       key={analysis.id}

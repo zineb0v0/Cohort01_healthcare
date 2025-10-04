@@ -12,5 +12,6 @@ class Analysis extends Model
         'filename',
         'type',
         'result',
+        'result_file',
     ];
 }
