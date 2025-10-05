@@ -1,27 +1,12 @@
 <?php
 
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\API\PatientController;
 use App\Http\Controllers\API\MedicationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnalysisController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-/* Route::get(  '/upload', function() {
-  //  return view('upload');
-//});
-//Route::post('/upload', [AnalysisController::class, 'store'])->name('analyses.store');
-*/
+use App\Http\Controllers\CollaboratorController;
 
 Route::post('/analyses', [AnalysisController::class, 'store']);
 Route::get('/analyses', [AnalysisController::class, 'index']);
@@ -32,12 +17,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']); //done
+Route::post('/login', [AuthController::class, 'login'])->name('login'); //done
 
 // Routes protégées par Sanctum
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/me', [AuthController::class, 'me']); // done
     Route::put('/me', [AuthController::class, 'updateProfile']);
 
     Route::post('/logout', action: [AuthController::class, 'logout']);
@@ -48,17 +33,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Custom collaborator routes
-    Route::get('/collaborator/appointments', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorAppointments']);
-    Route::get('/collaborator/patients', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorPatients']);
-    Route::post('/collaborator/appointments/{appointmentId}/confirm', [\App\Http\Controllers\CollaboratorController::class, 'confirmAppointment']);
-    Route::post('/collaborator/appointments/{appointmentId}/cancel', [\App\Http\Controllers\CollaboratorController::class, 'cancelAppointment']);
-    Route::put('/collaborator/appointments/{appointmentId}', [\App\Http\Controllers\CollaboratorController::class, 'updateAppointment']);
-    Route::get('/collaborator/profile', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorProfile']);
-    Route::put('/collaborator/profile', [\App\Http\Controllers\CollaboratorController::class, 'updateCollaboratorProfile']);
-});
+    Route::get('/collaborator/appointments', [CollaboratorController::class, 'getCollaboratorAppointments']);
+    Route::get('/collaborator/patients', [CollaboratorController::class, 'getCollaboratorPatients']);
+    Route::post('/collaborator/appointments/{appointmentId}/confirm', [CollaboratorController::class, 'confirmAppointment']);
+    Route::post('/collaborator/appointments/{appointmentId}/cancel', [CollaboratorController::class, 'cancelAppointment']);
+    Route::put('/collaborator/appointments/{appointmentId}', [CollaboratorController::class, 'updateAppointment']);
+    Route::get('/collaborator/profile', [CollaboratorController::class, 'getCollaboratorProfile']);
+    Route::put('/collaborator/profile', [CollaboratorController::class, 'updateCollaboratorProfile']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    // Dashboard du patient
     Route::get('/patient/dashboard', [PatientController::class, 'dashboard']);
 
     // CRUD medications
@@ -67,5 +49,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/patient/medications/{id}', [MedicationController::class, 'update']);
     Route::delete('/patient/medications/{id}', [MedicationController::class, 'destroy']);
 });
-
 

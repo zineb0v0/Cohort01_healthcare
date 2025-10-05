@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('analyses', function (Blueprint $table) {
-               $table->string('result_file')->nullable();
-    });
-}
+            $table->string('result_file')->nullable();
+        });
+    }
 
     /**
      * Reverse the migrations.
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('analyses', function (Blueprint $table) {
-            //
+            $table->dropColumn('result_file');
         });
     }
 };
