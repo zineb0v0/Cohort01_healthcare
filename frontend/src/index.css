@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -43,36 +44,36 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #fff; 
-  --foreground: #00345d; 
-  --card: #00345d; 
-  --card-foreground: #d0dee8; 
-  --popover: #00345d; 
-  --popover-foreground: #d0dee8; 
-  --primary: #001f42; 
-  --primary-foreground: #d0dee8; 
+  --background: #fff;
+  --foreground: #00345d;
+  --card: #00345d;
+  --card-foreground: #d0dee8;
+  --popover: #00345d;
+  --popover-foreground: #d0dee8;
+  --primary: #001f42;
+  --primary-foreground: #d0dee8;
   --secondary: #79a1c0; /* Muted Light Blue */
-  --secondary-foreground: #001f42; 
+  --secondary-foreground: #001f42;
   --muted: #79a1c0; /* Muted Light Blue */
-  --muted-foreground: #00345d; 
+  --muted-foreground: #00345d;
   --accent: #79a1c0; /* Muted Light Blue */
-  --accent-foreground: #001f42; 
-  --destructive: #e61811; 
-  --border: #00345d; 
-  --input: #00345d; 
+  --accent-foreground: #001f42;
+  --destructive: #e61811;
+  --border: #00345d;
+  --input: #00345d;
   --ring: #79a1c0; /* Muted Light Blue */
-  --chart-1: #00345d; 
+  --chart-1: #00345d;
   --chart-2: #79a1c0; /* Muted Light Blue */
-  --chart-3: #d0dee8; 
+  --chart-3: #d0dee8;
   --chart-4: #79a1c0; /* Muted Light Blue */
-  --chart-5: #00345d; 
-  --sidebar: #00345d; 
-  --sidebar-foreground: #d0dee8; 
-  --sidebar-primary: #001f42; 
-  --sidebar-primary-foreground: #d0dee8; 
+  --chart-5: #00345d;
+  --sidebar: #00345d;
+  --sidebar-foreground: #d0dee8;
+  --sidebar-primary: #001f42;
+  --sidebar-primary-foreground: #d0dee8;
   --sidebar-accent: #79a1c0; /* Muted Light Blue */
-  --sidebar-accent-foreground: #001f42; 
-  --sidebar-border: #00345d; 
+  --sidebar-accent-foreground: #001f42;
+  --sidebar-border: #00345d;
   --sidebar-ring: #79a1c0; /* Muted Light Blue */
 }
 
@@ -119,17 +120,6 @@
   }
 }
 
-/* .img-bg{
-  width: 900px;
-  height: 100%; */
-
-/* .image {
-  object-fit:cover; /* Image scales to fit within the container, preserving aspect ratio */
-/* width: 100%;
-  height: 100%;
-  left: auto;
-} */
-
 html,
 body,
 #root {
@@ -141,8 +131,6 @@ body {
 }
 
 /* ---------------- */
-/* Importing the font */
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap");
 
 /* Main container for the authentication page */
 .auth-container {
@@ -206,13 +194,7 @@ body {
 .toggle {
   background-color: #00345d;
   height: 100%;
-  /* background: linear-gradient(130deg, 
-    #001f42, /* Dark navy */
-  /* #00345d, 
-  /* #79a1c0, Muted light blue */
-  /* #00345d  Pastel light blue */
-  /* ); */
-  /* background-image: linear-gradient( 90.2deg,  rgba(1,47,95,1) -0.4%, rgba(56,141,217,1) 106.1% ); */
+
   background-image: linear-gradient(
     86.3deg,
     rgba(0, 119, 182, 1) 3.6%,
@@ -261,4 +243,43 @@ body {
 
 .auth-container.active .toggle-right {
   transform: translateX(200%);
+}
+#titlelogo {
+  font-family: "Yinmar", sans-serif;
+}
+.modern-gradient {
+  background: linear-gradient(50deg, #00345d 0%, #003f70 40%, #00a2ff 90%);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 18px rgba(0, 52, 93, 0.25);
+}
+
+.modern-gradient:hover {
+  background: linear-gradient(50deg, #001f42 0%, #00345d 40%, #0066b2 90%);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 25px rgba(0, 52, 93, 0.4);
+}
+
+.modern-gradient-btn {
+  background: linear-gradient(to bottom, #001f42 0%, #00345d 40%, #007bff 90%);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  transition: all 0.35s ease;
+  box-shadow: 0 4px 18px rgba(0, 52, 93, 0.25);
+}
+
+.modern-gradient-btn:hover {
+  background: linear-gradient(to bottom, #001f42 50%, #00345d 80%);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 6px 25px rgba(0, 52, 93, 0.4);
+}
+
+#connexion {
+  border-radius: 0.7rem;
+}
+#connexion:hover {
+  transform: translateY(-2px) scale(1.01);
 }

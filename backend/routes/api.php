@@ -6,6 +6,8 @@ use App\Http\Controllers\API\CollaboratorController;
 use App\Http\Controllers\API\MedicationController;
 use App\Http\Controllers\API\MedicationIntakeController;
 use App\Http\Controllers\API\PatientController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\NeswletterEmailController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,10 +15,6 @@ use Illuminate\Support\Facades\Route;
 | API Routes                                                              |
 |--------------------------------------------------------------------------|
 */
-
-// Route::get('/sanctum/csrf-cookie', function () {
-//     return response()->json(['message' => 'CSRF cookie set']);
-// });
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -27,6 +25,12 @@ Route::post('forgotPassword', [ForgotPasswordController::class, 'sendResetLinkEm
 Route::get('reset-password/{token}/{email}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 
 Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
+// Send mail
+
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
+Route::post('/newsletter', [NeswletterEmailController::class, 'store']);
+Route::get('/newsletter', [NeswletterEmailController::class, 'index']);
+Route::delete('/newsletter/{id}', [NeswletterEmailController::class, 'destroy']);
 
 // Routes that require Sanctum authentication
 Route::middleware('auth:sanctum')->group(function () {

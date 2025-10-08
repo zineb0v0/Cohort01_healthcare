@@ -120,7 +120,6 @@
     <div class="form-container">
         <h1>Réinitialiser votre mot de passe:</h1>
         <form id="reset-password-form" action="{{ route('password.update') }}" method="POST">
-            @csrf
             <input type="hidden" name="token" value="{{ $token }}">
             <input type="hidden" name="email" value="{{ $email }}">
 

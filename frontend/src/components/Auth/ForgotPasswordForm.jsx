@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
 import axios from "../../axios";
-import { toast } from "sonner"; 
-import { Button } from "../ui/button"; 
+import { toast } from "react-hot-toast"; 
+import { Button } from "../ui/button";
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
@@ -10,18 +9,6 @@ const ForgotPasswordForm = () => {
   const [error, setError] = useState(""); // General error message
   const [errors, setErrors] = useState([]); // Specific form validation errors
 
-  // Function to fetch CSRF token
-  const getCsrfCookie = async () => {
-    try {
-      await axios.get("http://localhost:8000/sanctum/csrf-cookie", {
-        withCredentials: true, // Ensuring cookies are sent
-      });
-      console.log("CSRF cookie set!");
-    } catch (error) {
-      console.error("Error fetching CSRF cookie:", error);
-  
-    }
-  };
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
@@ -30,16 +17,10 @@ const ForgotPasswordForm = () => {
     setErrors([]); // Reset validation errors
 
     try {
-      // Fetch CSRF token before sending the request
-      await getCsrfCookie();
-
       // Send forgot password request
       const response = await axios.post(
         "api/forgotPassword", // Your API endpoint
-        { email: email },
-        {
-          withCredentials: true, // Make sure cookies are sent with the request
-        }
+        { email: email }
       );
 
       toast.success(response.data.message, {

@@ -32,13 +32,13 @@ class Collaborator extends Model
 
     protected static function boot(): void
     {
-        static::creating(function ($collaborator) {
-            if (!$collaborator->id) {
-                $collaborator->id = (string) Str::uuid();
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = Str::uuid()->toString();
             }
         });
     }
-
 
     public function user()
     {

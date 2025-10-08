@@ -51,7 +51,7 @@ class AuthController extends Controller
             'address' => $request->address,
             'date_birth' => $request->date_birth,
             'gender' => $request->gender,
-            'urgency_number' => $request->has('urgency_number') && !empty($request->urgency_number) ? $request->urgency_number : null,
+            'urgency_number' => $request->filled('urgency_number') ? $request->urgency_number : null,
         ]);
 
         // 3. Assigner le rôle
@@ -59,14 +59,15 @@ class AuthController extends Controller
         Role::firstOrCreate(['name' => $role]);
         $user->assignRole($role);
 
-        if ($request->role === 'Patient') {
-            $user->patient()->create(attributes: []);
-        } elseif ($request->role === 'Collaborateur') {
+        // 4. Create role-specific relation
+        if ($role === 'Patient') {
+            $user->patient()->create([]);
+        } elseif ($role === 'Collaborateur') {
             $user->collaborator()->create([
                 'speciality' => $request->speciality,
                 'license_number' => $request->license_number,
                 'workplace' => $request->workplace,
-                'is_available' => $request->is_available ?? false, // Default to false if not provided
+                'is_available' => $request->is_available ?? false,
                 'availability' => $request->is_available ? $request->availability : null,
                 'rating' => 0,
             ]);
@@ -75,9 +76,18 @@ class AuthController extends Controller
         // 5. Création du token
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // 6. Dynamically load relations
+        $relations = ['profile']; // Always load profile
+        if ($role === 'Patient') {
+            $relations[] = 'patient';
+        }
+        if ($role === 'Collaborateur') {
+            $relations[] = 'collaborator';
+        }
+
         return response()->json([
             'access_token' => $token,
-            'user' => $user->load(['profile', 'patient', 'collaborator']),
+            'user' => $user->load($relations),
             'role' => $role,
         ]);
     }
@@ -106,7 +116,6 @@ class AuthController extends Controller
 
         // Return the response with token, role, and other necessary data
         return response()->json([
-            'message' => 'Connexion avec succès',  // Success message
             'access_token' => $token,             // The authentication token
             'role' => $role,                      // The role of the user (e.g., Patient or Collaborator)
             'user' => $user->load(['profile', 'patient', 'collaborator']),  // Load the related models
@@ -117,13 +126,36 @@ class AuthController extends Controller
     }
 
     // Logout
+    // public function logout(Request $request)
+    // {
+    //     // Delete all tokens of the authenticated user
+    //     Auth::user()->tokens->each(function ($token) {
+    //         $token->delete();
+    //     });
+
+    //     // Return a JSON response
+    //     return response()->json([
+    //         'message' => 'Déconnexion réussie',
+    //     ]);
+    // }
     public function logout(Request $request)
     {
-        Auth::user()->tokens->each(function ($token) {
-            $token->delete();
-        });
+        $user = Auth::user(); // Get the currently authenticated user
 
-        return response()->json(['message' => 'Déconnexion réussie']);
+        if ($user) {
+            // Delete only the token used in this request
+            /** @var \Laravel\Sanctum\PersonalAccessToken $token */
+            $token = $user->currentAccessToken();
+            $token->delete();
+
+            return response()->json([
+                'message' => 'Déconnexion réussie',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Utilisateur non authentifié',
+        ], 401);
     }
 
     // Get Authenticated User

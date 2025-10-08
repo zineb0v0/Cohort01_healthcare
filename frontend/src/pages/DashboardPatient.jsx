@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import axios from "../axios";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 
 function DashboardPatient() {
   const navigate = useNavigate();
@@ -14,24 +14,13 @@ function DashboardPatient() {
   const [role, setRole] = useState(null);
   const [token, setToken] = useState("");
 
-  // Fetch the CSRF token to allow the session
-  const getCsrfCookie = async () => {
-    try {
-      await axios.get("http://localhost:8000/sanctum/csrf-cookie", {
-        withCredentials: true, // Ensure cookies are included
-      });
-      console.log("CSRF cookie set!");
-    } catch (error) {
-      console.error("Error fetching CSRF cookie:", error);
-    }
-  };
+
 
   useEffect(() => {
     const fetchUserData = async () => {
       setToken(localStorage.getItem("access_token"));
       setRole(localStorage.getItem("role"));
 
-      await getCsrfCookie();
     };
 
     fetchUserData();

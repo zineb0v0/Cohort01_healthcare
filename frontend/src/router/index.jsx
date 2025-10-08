@@ -11,6 +11,7 @@ import CollaboratorLayout from "@/layouts/CollaboratorLayout";
 import ForgotPasswordForm from "@/components/Auth/ForgotPasswordForm";
 import ResetPasswordForm from "@/components/Auth/ResetPasswordForm";
 import AuthenticationPage from "@/pages/AuthenticationPage";
+import Contact from "@/pages/Contact";
 export const router = createBrowserRouter([
   {
     element: <GuestLayout />,
@@ -19,10 +20,14 @@ export const router = createBrowserRouter([
         path: "/",
         element: <Home />,
       },
-      {
-        path: "/users",
-        element: <Users />,
+       {
+        path: "/contact",
+        element: <Contact />,
       },
+      // {
+      //   path: "/users",
+      //   element: <Users />,
+      // },
       { path: "*", element: <NotFound /> },
     ],
   },

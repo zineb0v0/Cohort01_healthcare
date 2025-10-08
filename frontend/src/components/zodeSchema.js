@@ -29,13 +29,13 @@ const baseFields = {
       message: "Veuillez entrer une date de naissance valide",
     }),
   gender: z.enum(["homme", "femme"]),
-urgency_number: z
-  .string()
-  .nullable() // Allow null values
-  .refine((val) => val === null || val === "" || /^\+?\d{10,15}$/.test(val), {
-    message: "Numéro d'urgence invalide (10-15 chiffres)",
-  })
-  .optional(), // Optional because it can be null or empty
+  urgency_number: z
+    .string()
+    .nullable() // Allow null values
+    .refine((val) => val === null || val === "" || /^\+?\d{10,15}$/.test(val), {
+      message: "Numéro d'urgence invalide (10-15 chiffres)",
+    })
+    .optional(), // Optional because it can be null or empty
 };
 // Schéma Patient
 export const patientRegisterSchema = z
@@ -87,4 +87,17 @@ export const loginSchema = z.object({
   password: z.string().min(8, {
     message: "Le mot de passe doit comporter au moins 8 caractères",
   }),
+});
+
+export const contactSchema = z.object({
+  name: z
+    .string()
+    .min(3, { message: "Le nom doit comporter au moins 3 caractères" }),
+  phone: z.string().regex(/^\+?\d{10,15}$/, {
+    message: "Le numéro de téléphone doit être valide (10-15 chiffres)",
+  }),
+  email: z.string().email({ message: "Adresse email invalide" }),
+  message: z
+    .string()
+    .min(5, { message: "Le message doit comporter au moins 5 caractères" }),
 });

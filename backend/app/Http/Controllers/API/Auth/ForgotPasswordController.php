@@ -15,34 +15,66 @@ class ForgotPasswordController extends Controller
     /**
      * Send a password reset link to the given user email.
      */
+    // public function sendResetLinkEmail(Request $request)
+    // {
+    //     $request->validate([
+    //         'email' => 'required|string|email|max:255',
+    //     ]);
+
+    //     // Send the reset link using Laravel's built-in method
+    //     $status = Password::sendResetLink(
+    //         $request->only('email') // Send email as an array with the 'email' key
+    //     );
+
+    //     if ($status === Password::RESET_LINK_SENT) {
+    //         // Retrieve the token from the database (password_reset_tokens table)
+    //         $token = DB::table('password_reset_tokens')
+    //             ->where('email', $request->email)
+    //             ->latest()  // Get the most recent token
+    //             ->first()
+    //             ->token;
+
+    //         // Trigger the custom notification
+    //         $user = User::where('email', $request->email)->first();
+    //         $user->notify(new CustomResetPasswordNotification($token, $request->email));
+
+    //         return response()->json(['message' => 'Le lien du réinitialisation a été envoyé avec succès!']);
+    //     } else {
+    //         return response()->json(['message' => 'Échec de l\'envoi du lien de réinitialisation.'], 400);
+    //         // ->header('Content-Type', 'application/json; charset=utf-8');
+    //     }
+    // }
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate([
             'email' => 'required|string|email|max:255',
         ]);
 
-        // Send the reset link using Laravel's built-in method
-        $status = Password::sendResetLink(
-            $request->only('email') // Send email as an array with the 'email' key
+        // Find the user
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé.'], 404);
+        }
+
+        // Create a password reset token manually
+        $token = bin2hex(random_bytes(32));
+
+        // Store the token in the password_reset_tokens table
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            [
+                'email' => $user->email,
+                'token' => $token,
+                'created_at' => now(),
+            ]
         );
 
-        if ($status === Password::RESET_LINK_SENT) {
-            // Retrieve the token from the database (password_reset_tokens table)
-            $token = DB::table('password_reset_tokens')
-                ->where('email', $request->email)
-                ->latest()  // Get the most recent token
-                ->first()
-                ->token;
+        // Send your custom notification
+        $user->notify(new CustomResetPasswordNotification($token, $request->email));
 
-            // Trigger the custom notification
-            $user = User::where('email', $request->email)->first();
-            $user->notify(new CustomResetPasswordNotification($token, $request->email));
-
-            return response()->json(['message' => 'Le lien du réinitialisation a été envoyé avec succès!']);
-        } else {
-            return response()->json(['message' => 'Échec de l\'envoi du lien de réinitialisation.'], 400);
-            // ->header('Content-Type', 'application/json; charset=utf-8');
-        }
+        return response()->json([
+            'message' => 'Le lien de réinitialisation a été envoyé avec succès !',
+        ]);
     }
 
     /**

@@ -4,16 +4,19 @@ import RegisterForm from "@/components/Auth/RegisterForm"; // Your Register Form
 import LoginForm from "@/components/Auth/LoginForm"; // Your Login Form component
 export default function AuthenticationPage() {
   const location = useLocation();
-  const [isRegister, setIsRegister] = useState(false);
-  const [active, setActive] = useState(false);
-
+  const [isRegister, setIsRegister] = useState(
+    location.state?.mode === "register" ? true : false
+  );
+  const [active, setActive] = useState(
+    location.state?.mode === "register" ? true : false
+  );
   useEffect(() => {
-    if (location.state?.mode === "register") {
-      setIsRegister(true);
-      setActive(true);
-    } else {
+    if (location.state?.mode === "login") {
       setIsRegister(false);
       setActive(false);
+    } else if (location.state?.mode === "register") {
+      setIsRegister(true);
+      setActive(true);
     }
   }, [location.state]);
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'sonner';  
+import { toast } from "react-hot-toast";
 import { Button } from '../ui/button';  // the reusable Button component
 
 const ResetPasswordForm = () => {

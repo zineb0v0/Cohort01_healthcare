@@ -56,11 +56,13 @@ class Patient extends Model
     {
         return $this->hasMany(MedicationAnalysis::class);
     }
-        public function appointments()
+
+    public function appointments()
     {
         return $this->hasMany(Appointment::class, 'patient_id', 'patient_id');
     }
-       public function labReports()
+
+    public function labReports()
     {
         return $this->hasMany(LabReport::class, 'patient_id', 'patient_id');
     }

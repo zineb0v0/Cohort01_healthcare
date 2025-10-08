@@ -10,7 +10,6 @@ export default defineConfig({
     port: 3000, // new Port for Vite (React)
     proxy: {
       "/api": "http://localhost:8000", // Proxy API requests to Laravel backend
-      "/sanctum/csrf-cookie": "http://localhost:8000", // Proxy CSRF route
     },
   },
   resolve: {

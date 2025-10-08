@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import axios from "../axios";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 
 function DashboardCollaborator() {
   const navigate = useNavigate();
@@ -15,22 +15,11 @@ function DashboardCollaborator() {
     backgroundColor: "#15800f",
     color: "white",
   };
-  const getCsrfCookie = async () => {
-    try {
-      await axios.get("http://localhost:8000/sanctum/csrf-cookie", {
-        withCredentials: true,
-      });
-      console.log("CSRF cookie set!");
-    } catch (error) {
-      console.error("Error fetching CSRF cookie:", error);
-    }
-  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       setToken(localStorage.getItem("access_token"));
       setRole(localStorage.getItem("role"));
-      await getCsrfCookie();
     };
 
     fetchDashboardData();

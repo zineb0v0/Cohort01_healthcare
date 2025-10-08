@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import axios from "../../axios";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 
 export default function RegisterForm() {
   const initialTab = localStorage.getItem("tabValue") || "Patient";
@@ -76,11 +76,6 @@ export default function RegisterForm() {
         role: tabValue, // Get the selected role
       };
 
-      // Fetch CSRF token before submitting the form
-      await axios.get("http://localhost:8000/sanctum/csrf-cookie", {
-        withCredentials: true, // Ensure the cookie is sent with the request
-      });
-
       // Send registration request
       const response = await axios.post(
         "http://localhost:8000/api/register",
@@ -88,11 +83,7 @@ export default function RegisterForm() {
         {
           headers: {
             "Content-Type": "application/json",
-            "X-CSRF-TOKEN":
-              document.head.querySelector('meta[name="csrf-token"]').content ||
-              "",
           },
-          withCredentials: true, // Send credentials (cookies)
         }
       );
 
@@ -121,9 +112,7 @@ export default function RegisterForm() {
         error.response?.data || error.message
       );
       if (error.response && error.response.data.errors) {
-        toast.error(error.response?.data.errors);
-      } else {
-        toast.error("Registration failed. Please try again later.");
+        toast.error(JSON.stringify(error.response.data.errors));
       }
     }
   };
