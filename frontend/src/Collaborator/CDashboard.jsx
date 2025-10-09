@@ -13,25 +13,37 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [appointmentsRes, patientsRes, profileRes] = await Promise.all([
-          api.get("/api/collaborator/appointments"),
-          api.get("/api/collaborator/patients"),
-          api.get("/api/collaborator/profile"),
+        const token = localStorage.getItem("token");
+
+        const [appointmentsRes, patientsRes, collaboratorRes] = await Promise.all([
+          api.get("/api/collaborator/appointments", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          api.get("/api/collaborator/patients", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          api.get("/api/profile", {
+            headers: { Authorization: `Bearer ${token}` },
+          }), // 👈 endpoint qui renvoie le user connecté (avec profile)
         ]);
 
         const appointments = appointmentsRes.data;
+
+        // ✅ Compter les rendez-vous
         const confirmed = appointments.filter(a => a.status === "confirmed").length;
         const canceled = appointments.filter(a => a.status === "canceled").length;
 
+        // ✅ Extraire nom du collaborateur depuis user.profile
+        const doctorName = `${collaboratorRes.data.first_name} ${collaboratorRes.data.last_name}`;
         setStats({
           appointmentsCount: appointments.length,
-          patientsCount: patientsRes.data.length,
+          patientsCount: patientsRes.data.length || 0,
           confirmedAppointments: confirmed,
           canceledAppointments: canceled,
-          doctorName: profileRes.data.name,
+          doctorName,
         });
       } catch (err) {
-        console.error("Erreur lors du chargement du dashboard", err);
+        console.error("Erreur lors du chargement du dashboard:", err);
       }
     };
 
@@ -42,7 +54,7 @@ export default function Dashboard() {
     <div className="flex min-h-screen bg-gray-50">
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">
-          Bonjour, Dr. {stats.doctorName || "—"} 
+          Bonjour, Dr. {stats.doctorName || "—"}
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

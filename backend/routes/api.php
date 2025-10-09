@@ -18,11 +18,7 @@ use App\Http\Controllers\AuthController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-/* Route::get(  '/upload', function() {
-  //  return view('upload');
-//});
-//Route::post('/upload', [AnalysisController::class, 'store'])->name('analyses.store');
-*/
+
 
 Route::post('/analyses', [AnalysisController::class, 'store']);
 Route::get('/analyses', [AnalysisController::class, 'index']);

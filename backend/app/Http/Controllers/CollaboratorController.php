@@ -18,7 +18,16 @@ class CollaboratorController extends Controller
             return response()->json(['error' => 'Collaborator not found for this user.'], 404);
         }
 
-        $appointments = $collaborator->appointments()->with(['patient', 'collaborator'])->get();
+$appointments = $collaborator->appointments()
+    ->with([
+        'patient.user.profile' => function ($query) {
+            $query->select('id', 'user_id', 'first_name', 'last_name');
+        },
+        'collaborator.user.profile' => function ($query) {
+            $query->select('id', 'user_id', 'first_name', 'last_name');
+        }
+    ])
+    ->get();
         return response()->json($appointments);
     }
 
@@ -32,7 +41,7 @@ class CollaboratorController extends Controller
             return response()->json(['error' => 'Collaborator not found for this user.'], 404);
         }
 
-        $patients = $collaborator->patients()->with('user.profile')->get()->unique('id')->values();
+$patients = $collaborator->patients()->with('user.profile')->get()->unique('id')->values();
         return response()->json($patients);
     }
 
