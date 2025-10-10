@@ -1,16 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../lib/axios";
-import {
-  FaUser,
-  FaPhone,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
-  FaClock,
-  FaExclamationTriangle,
-  FaCalendarAlt,
-  FaStar,
-} from "react-icons/fa";
+import { User, Edit, LogOut, CheckCircle, Phone, MapPin, Calendar, Star } from "lucide-react";
 
 export default function CollaboratorProfile() {
   const [profile, setProfile] = useState(null);
@@ -18,40 +8,58 @@ export default function CollaboratorProfile() {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
 
-  // 🔹 Charger le profil
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return setLoading(false);
+useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return setLoading(false);
 
-        const res = await api.get("/api/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      const res = await api.get("/api/collaborator/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        setProfile(res.data);
-        setFormData({
-          first_name: res.data.first_name || "",
-          last_name: res.data.last_name || "",
-          phone: res.data.phone || "",
-          address: res.data.address || "",
-          date_birth: res.data.date_birth ? res.data.date_birth.split("T")[0] : "",
-          gender: res.data.gender || "",
-          speciality: res.data.speciality || "",
-          licenseNumber: res.data.licenseNumber || "",
-          workplace: res.data.workplace || "",
-          isAvailable: res.data.isAvailable ?? false,
-          availability: res.data.availability || "",
-          rating: res.data.rating ?? 0,
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+      console.log("✅ API Response:", res.data);
+
+      const user = res.data?.user; // 🛡️ optional chaining
+      if (!user) {
+        console.warn("⚠️ Aucun utilisateur trouvé dans la réponse.");
+        setProfile(null);
+        return;
       }
-    };
-    fetchProfile();
-  }, []);
+
+      const p = user.profile || {};
+      const c = user.collaborator || {};
+
+      const mergedProfile = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        first_name: p.first_name,
+        last_name: p.last_name,
+        phone: p.phone,
+        address: p.address,
+        date_birth: p.date_birth,
+        gender: p.gender,
+        emergency_contact: p.emergency_contact,
+        speciality: c.speciality,
+        licenseNumber: c.licenseNumber,
+        workplace: c.workplace,
+        isAvailable: c.isAvailable,
+        availability: c.availability,
+        rating: c.rating,
+        updated_at: c.updated_at,
+      };
+
+      setProfile(mergedProfile);
+      setFormData(mergedProfile);
+    } catch (err) {
+      console.error("❌ Erreur lors du chargement du profil:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchProfile();
+}, []);
 
   if (loading)
     return (
@@ -88,99 +96,97 @@ export default function CollaboratorProfile() {
   };
 
   return (
-    <div className="min-h-screen py-6 px-4 md:px-8 bg-gray-50">
-      {/* HEADER */}
-      <div className="max-w-4xl mx-auto relative">
-        <div className="h-32 bg-blue-500 rounded-t-xl"></div>
-        <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-          <img
-            src={`https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}&background=007bff&color=fff&bold=true`}
-            alt="Avatar"
-            className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
-          />
+    <div className="min-h-screen bg-gray-50 py-8 px-4 md:px-10">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 bg-blue-50 border border-blue-100 rounded-full flex items-center justify-center">
+              <User className="text-blue-500" size={36} />
+            </div>
+
+            <div>
+              {editMode ? (
+                <input
+                  type="text"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  className="text-2xl font-bold text-gray-800 border-b border-gray-300 focus:border-blue-500 outline-none"
+                />
+              ) : (
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {profile.first_name} {profile.last_name}
+                </h2>
+              )}
+              <p className="text-gray-500 text-sm">Collaborateur médical</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                  Spécialité: {profile.speciality || "—"}
+                </span>
+                <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                  <CheckCircle size={14} />{" "}
+                  {profile.isAvailable ? "Disponible" : "Occupé"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 text-sm">
+            <button
+              onClick={() => {
+                if (editMode) handleSave();
+                setEditMode(!editMode);
+              }}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-500 font-medium"
+            >
+              <Edit size={18} />
+              {editMode ? "Sauvegarder" : "Modifier"}
+            </button>
+
+            
+          </div>
         </div>
-      </div>
 
-      {/* INFO PRINCIPALE */}
-      <div className="max-w-4xl mx-auto mt-16 text-center">
-        {editMode ? (
-          <input
-            type="text"
-            name="first_name"
-            value={formData.first_name}
-            onChange={handleChange}
-            className="text-2xl font-semibold text-gray-800 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 text-center"
-          />
-        ) : (
-          <h2 className="text-2xl font-semibold text-gray-800">
-            {profile.first_name} {profile.last_name}
-          </h2>
-        )}
-        <p className="text-blue-600 font-medium">Collaborateur médical</p>
-        <p className="text-gray-500 text-sm mt-1">
-          Créé le{" "}
-          <span className="font-semibold">
-            {new Date(profile.created_at).toLocaleDateString("fr-FR")}
+        {/* BODY */}
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8 text-gray-700">
+          <InfoCard icon={<Phone />} label="Téléphone" name="phone" value={formData.phone} editMode={editMode} onChange={handleChange} />
+          <InfoCard icon={<MapPin />} label="Adresse" name="address" value={formData.address} editMode={editMode} onChange={handleChange} />
+          <InfoCard icon={<Calendar />} label="Date de naissance" name="date_birth" type="date" value={formData.date_birth} editMode={editMode} onChange={handleChange} />
+          <InfoCard icon={<User />} label="Genre" name="gender" value={formData.gender} editMode={editMode} onChange={handleChange} />
+          <InfoCard icon={<User />} label="Lieu de travail" name="workplace" value={formData.workplace} editMode={editMode} onChange={handleChange} />
+          <InfoCard icon={<Star />} label="Note" name="rating" value={formData.rating || "—"} editMode={false} />
+        </div>
+
+        {/* FOOTER */}
+        <div className="text-sm text-gray-500 border-t border-gray-100 pt-4 mt-8 text-center">
+          Dernière mise à jour :{" "}
+          <span className="font-medium text-gray-700">
+            {new Date(profile.updated_at).toLocaleString("fr-FR")}
           </span>
-        </p>
-      </div>
-
-
-      <div className="max-w-4xl mx-auto grid sm:grid-cols-2 md:grid-cols-3 gap-6 mt-10 text-gray-700">
-        <EditableCard icon={<FaPhone />} label="Téléphone" name="phone" value={formData.phone} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaMapMarkerAlt />} label="Adresse" name="address" value={formData.address} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaBirthdayCake />} label="Date de naissance" name="date_birth" type="date" value={formData.date_birth} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaTransgender />} label="Genre" name="gender" value={formData.gender} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaClock />} label="Disponibilité" name="availability" value={formData.availability} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaExclamationTriangle />} label="Disponible" name="isAvailable" type="checkbox" value={formData.isAvailable} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaUser />} label="Spécialité" name="speciality" value={formData.speciality} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaUser />} label="Numéro de licence" name="licenseNumber" value={formData.licenseNumber} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaUser />} label="Lieu de travail" name="workplace" value={formData.workplace} editMode={editMode} onChange={handleChange} />
-        <EditableCard icon={<FaStar />} label="Note" name="rating" value={formData.rating} editMode={false} />
-      </div>
-
-      {/* BOUTONS EDIT / SAVE */}
-      <div className="flex justify-center gap-4 mt-6">
-        {editMode ? (
-          <>
-            <button onClick={handleSave} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
-              💾 Sauvegarder
-            </button>
-            <button onClick={() => setEditMode(false)} className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
-              Annuler
-            </button>
-          </>
-        ) : (
-          <button onClick={() => setEditMode(true)} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
-            ✏️ Modifier
-          </button>
-        )}
-      </div>
-
-      {/* FOOTER */}
-      <div className="max-w-4xl mx-auto bg-blue-50 border-t border-blue-100 py-3 text-center text-sm text-blue-700 mt-8 rounded-b-xl">
-        <FaCalendarAlt className="inline-block mr-1" />
-        Dernière mise à jour :{" "}
-        <span className="font-medium">{new Date(profile.updated_at).toLocaleString("fr-FR")}</span>
+        </div>
       </div>
     </div>
   );
 }
 
-// Composant EditableCard
-function EditableCard({ icon, label, value, name, editMode, onChange, type = "text" }) {
+function InfoCard({ icon, label, value, name, editMode, onChange, type = "text" }) {
   return (
-    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 hover:shadow-md hover:bg-blue-50 transition-all duration-200">
-      <div className="flex items-center gap-2 text-blue-600 font-medium mb-1">
+    <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 hover:shadow-md transition-all duration-200">
+      <div className="flex items-center gap-2 text-blue-600 font-medium mb-2">
         {icon}
         <span>{label}</span>
       </div>
       {editMode && type !== "checkbox" ? (
-        <input type={type} name={name} value={value} onChange={onChange} className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      ) : type === "checkbox" && editMode ? (
-        <input type="checkbox" name={name} checked={value} onChange={onChange} className="h-5 w-5" />
+        <input
+          type={type}
+          name={name}
+          value={value || ""}
+          onChange={onChange}
+          className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
       ) : (
-        <p className="text-gray-800 font-semibold">{value ?? "—"}</p>
+        <p className="text-gray-800 font-semibold">{value || "—"}</p>
       )}
     </div>
   );

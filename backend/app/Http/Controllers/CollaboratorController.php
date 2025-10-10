@@ -118,19 +118,55 @@ $patients = $collaborator->patients()->with('user.profile')->get()->unique('id')
     }
 
     // Get collaborator profile
-    public function getCollaboratorProfile()
-    {
-        $user = Auth::user();
-        $collaborator = $user->collaborator;
+public function getCollaboratorProfile()
+{
+    $authUser = auth()->user();
 
-        if (!$collaborator) {
-            return response()->json(['error' => 'Collaborator not found for this user.'], 404);
-        }
+    // نسترجع المستخدم كـ Eloquent Model
+    $user = \App\Models\User::find($authUser->id);
 
-        $profile = $collaborator->user->profile;
-
-        return response()->json(['collaborator' => $collaborator, 'profile' => $profile]);
+    if (!$user) {
+        return response()->json(['error' => 'User not found.'], 404);
     }
+
+    // نتحقق واش عندو collaborator
+    $collaborator = $user->collaborator;
+    if (!$collaborator) {
+        return response()->json(['error' => 'Collaborator not found for this user.'], 404);
+    }
+
+    // نحمّلو العلاقات
+    $user->load(['profile', 'collaborator', 'roles']);
+
+    return response()->json([
+        'user' => [
+            'id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->roles->pluck('name')->first(),
+            'profile' => $user->profile ? [
+                'first_name' => $user->profile->first_name,
+                'last_name' => $user->profile->last_name,
+                'phone' => $user->profile->phone,
+                'address' => $user->profile->address,
+                'date_birth' => $user->profile->date_birth,
+                'gender' => $user->profile->gender,
+                'emergency_contact' => $user->profile->emergency_contact,
+            ] : null,
+            'collaborator' => [
+                'speciality' => $collaborator->speciality,
+                'licenseNumber' => $collaborator->licenseNumber,
+                'workplace' => $collaborator->workplace,
+                'availability' => $collaborator->availability,
+                'isAvailable' => $collaborator->isAvailable,
+                'rating' => $collaborator->rating,
+                'created_at' => $collaborator->created_at,
+                'updated_at' => $collaborator->updated_at,
+            ],
+        ]
+    ]);
+}
+
+
 
     // Update collaborator profile
     public function updateCollaboratorProfile(Request $request)

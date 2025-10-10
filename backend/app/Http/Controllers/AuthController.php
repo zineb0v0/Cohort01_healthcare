@@ -82,7 +82,7 @@ class AuthController extends Controller
             'message' => 'User registered successfully',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user->load(['profile', 'patient']),
+            'user' => $user->load(['profile', 'patient','collaborator']),
         ]);
     }
 
