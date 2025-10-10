@@ -194,6 +194,7 @@ public function getCollaboratorProfile()
             'licenseNumber' => 'nullable|string|max:255',
             'workplace' => 'nullable|string|max:255',
             'availability' => 'nullable|string|max:255',
+            'isAvailable' => 'nullable|boolean',
         ]);
 
         // Update user email
@@ -212,12 +213,14 @@ public function getCollaboratorProfile()
         ]);
 
         // Update collaborator info
-        $collaborator->update([
-            'speciality' => $validated['speciality'] ?? null,
-            'licenseNumber' => $validated['licenseNumber'] ?? null,
-            'workplace' => $validated['workplace'] ?? null,
-            'availability' => $validated['availability'] ?? null,
-        ]);
+       $collaborator->update([
+    'speciality' => $validated['speciality'] ?? null,
+    'licenseNumber' => $validated['licenseNumber'] ?? null,
+    'workplace' => $validated['workplace'] ?? null,
+    'availability' => $validated['availability'] ?? null,
+    'isAvailable' => isset($validated['isAvailable']) ? ($validated['isAvailable'] ? 1 : 0) : $collaborator->isAvailable,
+]);
+
 
         return response()->json([
             'message' => 'Profile updated successfully.',

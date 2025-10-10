@@ -17,6 +17,10 @@ class Collaborator extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
+    protected $casts = [
+    'isAvailable' => 'boolean',
+];
+
 
     protected $fillable = [
         'id',

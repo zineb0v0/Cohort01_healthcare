@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../lib/axios";
-import { User, Edit, LogOut, CheckCircle, Phone, MapPin, Calendar, Star } from "lucide-react";
+import { User, Edit, CheckCircle, Phone, MapPin, Calendar, Star } from "lucide-react";
 
 export default function CollaboratorProfile() {
   const [profile, setProfile] = useState(null);
@@ -8,6 +8,7 @@ export default function CollaboratorProfile() {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
 
+  // 🔹 Charger le profil
 useEffect(() => {
   const fetchProfile = async () => {
     try {
@@ -18,11 +19,8 @@ useEffect(() => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("✅ API Response:", res.data);
-
-      const user = res.data?.user; // 🛡️ optional chaining
+      const user = res.data?.user;
       if (!user) {
-        console.warn("⚠️ Aucun utilisateur trouvé dans la réponse.");
         setProfile(null);
         return;
       }
@@ -44,7 +42,8 @@ useEffect(() => {
         speciality: c.speciality,
         licenseNumber: c.licenseNumber,
         workplace: c.workplace,
-        isAvailable: c.isAvailable,
+        // 🔹 Convertir 0/1 en booléen
+        isAvailable: !!c.isAvailable,
         availability: c.availability,
         rating: c.rating,
         updated_at: c.updated_at,
@@ -53,7 +52,7 @@ useEffect(() => {
       setProfile(mergedProfile);
       setFormData(mergedProfile);
     } catch (err) {
-      console.error("❌ Erreur lors du chargement du profil:", err);
+      console.error("Erreur lors du chargement du profil:", err);
     } finally {
       setLoading(false);
     }
@@ -86,14 +85,69 @@ useEffect(() => {
       const res = await api.put("/api/collaborator/profile", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Profil mis à jour avec succès !");
-      setProfile(res.data.profile);
+
+      const user = res.data.user;
+      const p = user.profile || {};
+      const c = user.collaborator || {};
+
+      const mergedProfile = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        first_name: p.first_name,
+        last_name: p.last_name,
+        phone: p.phone,
+        address: p.address,
+        date_birth: p.date_birth,
+        gender: p.gender,
+        emergency_contact: p.emergency_contact,
+        speciality: c.speciality,
+        licenseNumber: c.licenseNumber,
+        workplace: c.workplace,
+        isAvailable: c.isAvailable,
+        availability: c.availability,
+        rating: c.rating,
+        updated_at: c.updated_at,
+      };
+
+      setProfile(mergedProfile);
+      setFormData(mergedProfile);
       setEditMode(false);
+      alert("Profil mis à jour avec succès !");
     } catch (err) {
       console.error(err);
       alert("Erreur lors de la mise à jour du profil !");
     }
   };
+
+const toggleAvailability = async () => {
+  try {
+    // Optimistic update : on inverse la valeur actuelle
+    const updatedStatus = !profile.isAvailable;
+
+    setProfile({ ...profile, isAvailable: updatedStatus });
+    setFormData({ ...formData, isAvailable: updatedStatus });
+
+    const token = localStorage.getItem("token");
+
+    // On envoie 1/0 au backend
+    await api.put(
+      "/api/collaborator/profile",
+      { ...formData, isAvailable: updatedStatus ? 1 : 0 },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // Pas besoin de reset car on fait optimistic update
+  } catch (err) {
+    console.error("Erreur lors du changement de disponibilité:", err);
+
+    // Revert en cas d'erreur
+    setProfile(prev => ({ ...prev, isAvailable: !prev.isAvailable }));
+    setFormData(prev => ({ ...prev, isAvailable: !prev.isAvailable }));
+  }
+};
+
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 md:px-10">
@@ -120,14 +174,23 @@ useEffect(() => {
                 </h2>
               )}
               <p className="text-gray-500 text-sm">Collaborateur médical</p>
+
               <div className="flex flex-wrap gap-2 mt-2">
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                   Spécialité: {profile.speciality || "—"}
                 </span>
-                <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                  <CheckCircle size={14} />{" "}
+
+                <button
+                  onClick={toggleAvailability}
+                  className={`flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full ${
+                    profile.isAvailable
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  <CheckCircle size={14} />
                   {profile.isAvailable ? "Disponible" : "Occupé"}
-                </span>
+                </button>
               </div>
             </div>
           </div>
@@ -143,19 +206,59 @@ useEffect(() => {
               <Edit size={18} />
               {editMode ? "Sauvegarder" : "Modifier"}
             </button>
-
-            
           </div>
         </div>
 
         {/* BODY */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8 text-gray-700">
-          <InfoCard icon={<Phone />} label="Téléphone" name="phone" value={formData.phone} editMode={editMode} onChange={handleChange} />
-          <InfoCard icon={<MapPin />} label="Adresse" name="address" value={formData.address} editMode={editMode} onChange={handleChange} />
-          <InfoCard icon={<Calendar />} label="Date de naissance" name="date_birth" type="date" value={formData.date_birth} editMode={editMode} onChange={handleChange} />
-          <InfoCard icon={<User />} label="Genre" name="gender" value={formData.gender} editMode={editMode} onChange={handleChange} />
-          <InfoCard icon={<User />} label="Lieu de travail" name="workplace" value={formData.workplace} editMode={editMode} onChange={handleChange} />
-          <InfoCard icon={<Star />} label="Note" name="rating" value={formData.rating || "—"} editMode={false} />
+          <InfoCard
+            icon={<Phone />}
+            label="Téléphone"
+            name="phone"
+            value={formData.phone}
+            editMode={editMode}
+            onChange={handleChange}
+          />
+          <InfoCard
+            icon={<MapPin />}
+            label="Adresse"
+            name="address"
+            value={formData.address}
+            editMode={editMode}
+            onChange={handleChange}
+          />
+          <InfoCard
+            icon={<Calendar />}
+            label="Date de naissance"
+            name="date_birth"
+            type="date"
+            value={formData.date_birth}
+            editMode={editMode}
+            onChange={handleChange}
+          />
+          <InfoCard
+            icon={<User />}
+            label="Genre"
+            name="gender"
+            value={formData.gender}
+            editMode={editMode}
+            onChange={handleChange}
+          />
+          <InfoCard
+            icon={<User />}
+            label="Lieu de travail"
+            name="workplace"
+            value={formData.workplace}
+            editMode={editMode}
+            onChange={handleChange}
+          />
+          <InfoCard
+            icon={<Star />}
+            label="Note"
+            name="rating"
+            value={formData.rating || "—"}
+            editMode={false}
+          />
         </div>
 
         {/* FOOTER */}
