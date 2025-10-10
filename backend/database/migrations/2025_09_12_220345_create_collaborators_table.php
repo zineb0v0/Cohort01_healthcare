@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->string('speciality');
-            $table->string('licenseNumber');
+            $table->string('license_number');
             $table->string('workplace');
             $table->boolean('isAvailable')->default(true);
             $table->string('availability')->nullable();

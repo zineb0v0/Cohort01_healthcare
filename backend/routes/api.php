@@ -1,11 +1,13 @@
 <?php
 
-use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\PatientController;
 use App\Http\Controllers\API\MedicationController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\AuthController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -44,23 +46,35 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Exemple : route protégée pour voir un profil
     Route::get('/profile', function () {
-        return auth()->user()->profile;
-    });
+    $profile = auth()->user()->profile;
+    return [
+        'id' => $profile->id,
+        'first_name' => $profile->first_name,
+        'last_name' => $profile->last_name,
+        'phone' => $profile->phone,
+        'address' => $profile->address,
+        'date_birth' => $profile->date_birth,
+        'gender' => $profile->gender,
+        'emergency_contact' => $profile->emergency_contact,
+        'email' => auth()->user()->email, // add this line
+    ];
+});
 
     // Custom collaborator routes
-    Route::get('/collaborator/appointments', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorAppointments']);
+   });
+ Route::get('/collaborator/appointments', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorAppointments']);
     Route::get('/collaborator/patients', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorPatients']);
     Route::post('/collaborator/appointments/{appointmentId}/confirm', [\App\Http\Controllers\CollaboratorController::class, 'confirmAppointment']);
     Route::post('/collaborator/appointments/{appointmentId}/cancel', [\App\Http\Controllers\CollaboratorController::class, 'cancelAppointment']);
     Route::put('/collaborator/appointments/{appointmentId}', [\App\Http\Controllers\CollaboratorController::class, 'updateAppointment']);
     Route::get('/collaborator/profile', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorProfile']);
     Route::put('/collaborator/profile', [\App\Http\Controllers\CollaboratorController::class, 'updateCollaboratorProfile']);
-});
 
 Route::middleware('auth:sanctum')->group(function () {
     // Dashboard du patient
     Route::get('/patient/dashboard', [PatientController::class, 'dashboard']);
-
+    Route::get('/patient/account-activity', [ProfileController::class, 'accountActivity']);
+    
     // CRUD medications
     Route::get('/patient/medications', [MedicationController::class, 'index']);
     Route::post('/patient/medications', [MedicationController::class, 'store']);
@@ -69,3 +83,28 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+Route::middleware('auth:sanctum')->put('/profile', function () {
+    $profile = auth()->user()->profile;
+
+    request()->validate([
+        'first_name' => 'string|max:255',
+        'last_name' => 'string|max:255',
+        'phone' => 'string|max:20',
+        'address' => 'string|max:255',
+        'date_birth' => 'date',
+        'gender' => 'in:male,female,other',
+        'emergency_contact' => 'nullable|string|max:20',
+    ]);
+
+    $profile->update(request()->only([
+        'first_name',
+        'last_name',
+        'phone',
+        'address',
+        'date_birth',
+        'gender',
+        'emergency_contact',
+    ]));
+
+    return response()->json($profile);
+});

@@ -1,10 +1,46 @@
-import Dashboard from "./components/Dashboard";
+// src/App.jsx
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
+// === Patient Components ===
+import Layout from "./components/PatientComponents/layout/Layout.jsx";
+import ProfilePage from "./pages/patient/ProfilePage.jsx";
+
+// Temporary placeholder for pages not yet developed
+const ComingSoonPage = ({ pageName }) => (
+  <div className="flex items-center justify-center h-64">
+    <div className="text-center">
+      <h2 className="text-2xl font-bold text-gray-600 mb-2">{pageName}</h2>
+      <p className="text-gray-500">Page en cours de développement</p>
+    </div>
+  </div>
+);
 
 export default function App() {
-return (
-    <div className="min-h-screen bg-gray-100">
-      <Dashboard />
-    </div>
+  return (
+    <Router>
+      <Routes>
+        {/* === Patient Routes === */}
+        <Route path="/patient" element={<Layout />}>
+          {/* Default route inside Layout */}
+          <Route index element={<Navigate to="profile" replace />} />
+
+          {/* Patient pages */}
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="dashboard" element={<ComingSoonPage pageName="Tableau de Bord" />} />
+          <Route path="medications" element={<ComingSoonPage pageName="Médicaments" />} />
+          <Route path="appointments" element={<ComingSoonPage pageName="Rendez-vous" />} />
+          <Route path="settings" element={<ComingSoonPage pageName="Paramètres" />} />
+        </Route>
+
+        {/* Default redirect if someone opens "/" */}
+        <Route path="/" element={<Navigate to="/patient/profile" replace />} />
+      </Routes>
+    </Router>
   );
 }
-

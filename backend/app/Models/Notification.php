@@ -16,6 +16,12 @@ class Notification extends Model
         'type',
         'message',
         'send_time',
+        'read', // Ajouter ce champ
+    ];
+
+    protected $casts = [
+        'send_time' => 'datetime',
+        'read' => 'boolean',
     ];
 
     public function patient()

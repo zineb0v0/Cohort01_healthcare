@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -17,20 +18,21 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
+            'email' => 'required|string|email|unique:users,email|max:255',
+            'password' => 'required|string|min:8|confirmed',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
-            'date_birth' => 'nullable|date',
-            'gender' => 'nullable|string|in:male,female,other',
-            'emergency_contact' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:15',
+            'address' => 'required|string|max:255',
+            'date_birth' => 'required|date',
+            'gender' => 'required|string|in:male,female',
+            'urgency_number' => 'nullable|string|max:15',
             'role' => 'required|in:Patient,Collaborateur',
-            'urgency_number' => 'required_if:role,Patient|string|max:20', // specific au patient mais non required
-            'speciality' => 'required_if:role,Collaborateur|string|max:255', // Required if role is Collaborateur
-            'licenseNumber' => 'required_if:role,Collaborateur|string|max:255',
+            'speciality' => 'required_if:role,Collaborateur|string|max:255',
+            'license_number' => 'required_if:role,Collaborateur|string|max:255',
             'workplace' => 'required_if:role,Collaborateur|string|max:255',
+            'is_available' => 'required_if:role,Collaborateur|boolean',
+            'availability' => 'required_if:is_available,true|nullable|string|max:255',
         ]);
 
         // 1. Création du user
@@ -49,94 +51,131 @@ class AuthController extends Controller
             'address' => $request->address,
             'date_birth' => $request->date_birth,
             'gender' => $request->gender,
-            'emergency_contact' => $request->emergency_contact,
+            'urgency_number' => $request->filled('urgency_number') ? $request->urgency_number : null,
         ]);
 
-        // Assigner le rôle
+        // 3. Assigner le rôle
         $role = $request->role;
         Role::firstOrCreate(['name' => $role]);
         $user->assignRole($role);
 
-
-         //  Si Patient
+        // 4. Create role-specific relation
         if ($role === 'Patient') {
-            $user->patient()->create([
-                'urgency_number' => $request->urgency_number ?? null,
-            ]);
-        }
-
-        // Si Collaborateur
-        if ($role === 'Collaborateur') {
+            $user->patient()->create([]);
+        } elseif ($role === 'Collaborateur') {
             $user->collaborator()->create([
                 'speciality' => $request->speciality,
-                'licenseNumber' => $request->licenseNumber,
+                'license_number' => $request->license_number,
                 'workplace' => $request->workplace,
+                'is_available' => $request->is_available ?? false,
+                'availability' => $request->is_available ? $request->availability : null,
+                'rating' => 0,
             ]);
         }
 
-
-        // Création du token
+        // 5. Création du token
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // 6. Dynamically load relations
+        $relations = ['profile']; // Always load profile
+        if ($role === 'Patient') {
+            $relations[] = 'patient';
+        }
+        if ($role === 'Collaborateur') {
+            $relations[] = 'collaborator';
+        }
+
         return response()->json([
-            'message' => 'User registered successfully',
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user->load(['profile', 'patient']),
+            'user' => $user->load($relations),
+            'role' => $role,
         ]);
     }
 
-    // Login
     public function login(Request $request)
     {
+        // Validate the request data
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.']
-            ]);
+        // Attempt to authenticate the user with the provided credentials
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            throw ValidationException::withMessages(['message' => ['The provided credentials are incorrect.']]);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // Get the authenticated user
+        $user = User::where('email', $request->email)->firstOrFail();
 
+        // Mettre à jour last_login ici
+        $user->last_login_at = now();
+        $user->save();
+
+        // Create a token for the user
+        $token = $user->createToken('auth_Token')->plainTextToken;
+
+        // Retrieve the role of the user (e.g., 'Patient', 'Collaborateur')
+        $role = $user->getRoleNames()->first();  // Assuming you are using Spatie roles
+
+        // Return the response with token, role, and other necessary data
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => [
-                'id' => $user->id,
-                'email' => $user->email,
-                'role' => $user->getRoleNames(),
-                'profile' => $user->profile,
-                'patient' => $user->patient,
-            ],
+            'access_token' => $token,             // The authentication token
+            'role' => $role,                      // The role of the user (e.g., Patient or Collaborator)
+            'user' => $user->load(['profile', 'patient', 'collaborator']),  // Load the related models
+            // 'profile' => optional($user->profile),  // Include the profile, if exists
+            // 'patient' => optional($user->patient),  // Include patient details, if exists
+            // 'collaborator' => optional($user->collaborator),  // Include collaborator details, if exists
         ]);
     }
 
     // Logout
+    // public function logout(Request $request)
+    // {
+    //     // Delete all tokens of the authenticated user
+    //     Auth::user()->tokens->each(function ($token) {
+    //         $token->delete();
+    //     });
+
+    //     // Return a JSON response
+    //     return response()->json([
+    //         'message' => 'Déconnexion réussie',
+    //     ]);
+    // }
     public function logout(Request $request)
     {
-        $token = $request->user()->currentAccessToken();
-        if ($token) {
+        $user = Auth::user(); // Get the currently authenticated user
+
+        if ($user) {
+            // Delete only the token used in this request
+            /** @var \Laravel\Sanctum\PersonalAccessToken $token */
+            $token = $user->currentAccessToken();
             $token->delete();
+
+            return response()->json([
+                'message' => 'Déconnexion réussie',
+            ]);
         }
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json([
+            'message' => 'Utilisateur non authentifié',
+        ], 401);
     }
 
     // Get Authenticated User
+    // In AuthController
     public function me(Request $request)
     {
+        $user = $request->user(); // Get the authenticated user
+
+        // Return basic user data along with the profile and role
         return response()->json([
-            'id' => $request->user()->id,
-            'email' => $request->user()->email,
-            'role' => $request->user()->getRoleNames(),
-            'profile' => $request->user()->profile,
-            'patient' => $request->user()->patient,
+            'id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->getRoleNames()->first(), // Only the first role (assuming single role)
+            'profile' => $user->profile,  // Profile information
+            'patient' => $user->patient,  // Patient-specific info (if exists)
+            'collaborator' => $user->collaborator,  // Collaborator-specific info (if exists)
         ]);
     }
 
@@ -147,20 +186,27 @@ class AuthController extends Controller
 
         $data = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
             'password' => 'sometimes|string|min:6|confirmed',
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
             'phone' => 'sometimes|string|max:20',
             'address' => 'sometimes|string|max:255',
             'date_birth' => 'sometimes|date|before:today',
+            // Optional fields
+            'urgency_number' => 'sometimes|nullable|string|max:15',
+
+            // For collaborators
+            'speciality' => 'sometimes|required_if:role,Collaborateur|string|max:255',
+            'license_number' => 'sometimes|required_if:role,Collaborateur|string|max:255',
+            'workplace' => 'sometimes|required_if:role,Collaborateur|string|max:255',
         ]);
 
         $user->update($data);
 
         return response()->json([
-            'message' => 'Profile updated successfully',
-            'user' => $user->load(['profile', 'patient']),
+            'message' => 'Profil modifié avec succès',
+            'user' => $user->load(['profile', 'patient', 'collaborator']),
         ]);
     }
 }
