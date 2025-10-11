@@ -1,6 +1,6 @@
 // Uploader.jsx
 import React, { useState } from "react";
-import api from "../../lib/axios";
+import api from "../../../lib/axios";
 
 export default function Uploader({ onUploaded }) {
   const [file, setFile] = useState(null);

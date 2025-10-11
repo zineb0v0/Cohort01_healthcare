@@ -17,12 +17,17 @@ class Collaborator extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
+    protected $casts = [
+    'isAvailable' => 'boolean',
+]   ;
+
+
 
     protected $fillable = [
         'id',
         'user_id',
         'speciality',
-        'licenseNumber',
+        'license_number',
         'workplace',
         'isAvailable',
         'availability',

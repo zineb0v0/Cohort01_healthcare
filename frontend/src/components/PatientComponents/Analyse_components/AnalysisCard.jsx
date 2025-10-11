@@ -1,6 +1,6 @@
 import React from "react";
 import { AiOutlineEye, AiOutlineDownload, AiOutlineDelete, AiOutlineFile } from "react-icons/ai";
-import api from "../../lib/axios";
+import api from "../../../lib/axios";
 
 export default function AnalysisCard({ analysis, onDelete }) {
   const handleDelete = async () => {

@@ -10,6 +10,12 @@ import {
 // === Patient Components ===
 import Layout from "./components/PatientComponents/layout/Layout.jsx";
 import ProfilePage from "./pages/patient/ProfilePage.jsx";
+import AnalysePage from "./components/PatientComponents/Analyse_components/AnalysePage.jsx";
+// === Collaborator Components ===
+import Dashboard from "./components/Collaborator/CDashboard.jsx";
+import CollaboratorLayout from "./components/Collaborator/layout/CLayout.jsx";
+import CollaboratorProfile from "./components/Collaborator/CProfile.jsx";
+import RendezVousCollaborator from "./components/Collaborator/CRendezVous.jsx";
 
 // Temporary placeholder for pages not yet developed
 const ComingSoonPage = ({ pageName }) => (
@@ -20,6 +26,7 @@ const ComingSoonPage = ({ pageName }) => (
     </div>
   </div>
 );
+
 
 export default function App() {
   return (
@@ -36,10 +43,22 @@ export default function App() {
           <Route path="medications" element={<ComingSoonPage pageName="Médicaments" />} />
           <Route path="appointments" element={<ComingSoonPage pageName="Rendez-vous" />} />
           <Route path="settings" element={<ComingSoonPage pageName="Paramètres" />} />
+          <Route path="reports" element={<ComingSoonPage pageName="Rapports" />} />
         </Route>
 
         {/* Default redirect if someone opens "/" */}
         <Route path="/" element={<Navigate to="/patient/profile" replace />} />
+        <Route path="/" element={<Layout />}>
+          <Route index element={<AnalysePage />} />
+        </Route>
+        
+        {/* === Collaborator Routes === */}
+          <Route path="/collaborator" element={<CollaboratorLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path='/collaborator/profile' element={<CollaboratorProfile />} />
+          <Route path='/collaborator/RendezVous' element={<RendezVousCollaborator />} />
+        </Route>
+
       </Routes>
     </Router>
   );
