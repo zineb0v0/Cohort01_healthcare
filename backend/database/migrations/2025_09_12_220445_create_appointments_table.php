@@ -14,18 +14,16 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->uuid('patient_id');
             $table->uuid('collaborator_id');
-            $table->uuid('medical_dossier_id');
             $table->dateTime('date');            // date et heure du rendez-vous
             $table->time('time')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'canceled'])->default('pending');
-            $table->boolean('is_telehealth')->default(false);
-            $table->string('telehealth_url')->nullable();
+            $table->boolean('isTelehealth')->default(false);
+            $table->string('telehealthLink')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
             $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
             $table->foreign('collaborator_id')->references('id')->on('collaborators')->onDelete('cascade');
-            $table->foreign('medical_dossier_id')->references('id')->on('medical_dossiers')->onDelete('cascade');
         });
     }
 

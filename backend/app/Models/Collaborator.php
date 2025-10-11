@@ -17,6 +17,9 @@ class Collaborator extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
+    protected $casts = [
+        'is_available' => 'boolean',
+    ];
 
     protected $dates = ['deleted_at'];
 

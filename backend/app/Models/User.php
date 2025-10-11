@@ -23,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'email',
         'password',
+        'last_login_at', // j'ai ajouté cette ligne pour l'update de date de login
     ];
 
     protected $hidden = [
@@ -32,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
         'password' => 'hashed',
     ];
 

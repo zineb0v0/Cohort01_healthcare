@@ -5,15 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
 class Patient extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use Notifiable;
 
-    protected $keyType = 'string';
+    protected $table = 'patients';
+    protected $primaryKey = 'id';
     public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'user_id',
@@ -57,13 +61,18 @@ class Patient extends Model
         return $this->hasMany(MedicationAnalysis::class);
     }
 
+    // public function appointments()
+    // {
+    //     return $this->hasMany(Appointment::class, 'patient_id', 'patient_id');
+    // }
+
+    // public function labReports()
+    // {
+    //     return $this->hasMany(LabReport::class, 'patient_id', 'patient_id');
+    // }
+
     public function appointments()
     {
-        return $this->hasMany(Appointment::class, 'patient_id', 'patient_id');
-    }
-
-    public function labReports()
-    {
-        return $this->hasMany(LabReport::class, 'patient_id', 'patient_id');
+        return $this->hasMany(Appointment::class);
     }
 }

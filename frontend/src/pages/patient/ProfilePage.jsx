@@ -1,0 +1,325 @@
+import { useState, useEffect, useRef } from "react";
+import ProfileSection from "../../components/PatientComponents/Profile/ProfileSection";
+import PersonalInformation from "../../components/PatientComponents/Profile/PersonalInformation";
+import MedicalConditions from "../../components/PatientComponents/Profile/MedicalConditions";
+import AccountActivity from "../../components/PatientComponents/Profile/AccountActivity";
+import api from "../../services/api";
+import { Bell, Check, Calendar, AlertCircle, Info } from "lucide-react";
+
+export default function ProfilePage() {
+  // ✅ STATES
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    dateBirth: "",
+    address: "",
+    emergencyContact: "",
+    allergies: "None reported",
+  });
+
+  const [formData, setFormData] = useState({ ...userData });
+  const [accountStats, setAccountStats] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  // ✅ NOTIFICATIONS STATES
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const notificationsRef = useRef(null);
+
+  // ✅ SYNC FORM DATA WHEN USERDATA UPDATES
+  useEffect(() => {
+    setFormData(userData);
+  }, [userData]);
+
+  // ✅ FETCH USER PROFILE
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get("/profile");
+        console.log("Fetched profile:", response.data);
+
+        setUserData({
+          name: `${response.data.first_name} ${response.data.last_name}`,
+          email: response.data.email || "",
+          phone: response.data.phone || "",
+          dateBirth: response.data.date_birth || "",
+          address: response.data.address || "",
+          emergencyContact: response.data.emergency_contact || "Not provided",
+          allergies: response.data.allergies || "None reported",
+        });
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  // ✅ FETCH ACCOUNT ACTIVITY
+  useEffect(() => {
+    const fetchAccountActivity = async () => {
+      try {
+        const response = await api.get("/patient/account-activity");
+        console.log("Fetched activity:", response.data);
+
+        const data = response.data;
+        setAccountStats([
+          { label: "Member Since", value: data.member_since },
+          { label: "Total Appointments", value: data.total_appointments },
+          { label: "Last Login", value: data.last_login_at },
+        ]);
+      } catch (error) {
+        console.error("Error fetching account activity:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccountActivity();
+  }, []);
+
+  // ✅ FETCH NOTIFICATIONS (mock data pour l'instant)
+  useEffect(() => {
+    const mockNotifications = [
+      {
+        id: 1,
+        type: "appointment",
+        title: "Rendez-vous confirmé",
+        message: "Votre rendez-vous avec Dr. Smith est confirmé pour demain à 14:00",
+        time: "Il y a 5 min",
+        read: false,
+        icon: Calendar
+      },
+      {
+        id: 2,
+        type: "reminder",
+        title: "Rappel de médicament",
+        message: "N'oubliez pas de prendre votre traitement",
+        time: "Il y a 1 heure",
+        read: false,
+        icon: AlertCircle
+      },
+      {
+        id: 3,
+        type: "info",
+        title: "Nouvelle fonctionnalité",
+        message: "Découvrez notre nouveau système de suivi de santé",
+        time: "Il y a 2 heures",
+        read: true,
+        icon: Info
+      },
+      {
+        id: 4,
+        type: "appointment",
+        title: "Rappel de rendez-vous",
+        message: "Rendez-vous dentaire dans 3 jours à 10:00",
+        time: "Il y a 1 jour",
+        read: true,
+        icon: Calendar
+      }
+    ];
+
+    setNotifications(mockNotifications);
+    setUnreadCount(mockNotifications.filter(n => !n.read).length);
+  }, []);
+
+  // ✅ CLOSE NOTIFICATIONS WHEN CLICKING OUTSIDE
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // ✅ HANDLE INPUT CHANGES
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // ✅ MARK NOTIFICATION AS READ
+  const markAsRead = (notificationId) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === notificationId 
+          ? { ...notification, read: true }
+          : notification
+      )
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  // ✅ MARK ALL AS READ
+  const markAllAsRead = () => {
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, read: true }))
+    );
+    setUnreadCount(0);
+  };
+
+  // ✅ TOGGLE NOTIFICATIONS DROPDOWN
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  // ✅ SAVE UPDATED PROFILE
+  const handleSave = async () => {
+    // ... (ton code existant pour handleSave)
+    const originalData = { ...userData };
+    // Validation et sauvegarde...
+  };
+
+  // ✅ LOGOUT HANDLER
+  const handleLogout = () => {
+    console.log("User logged out");
+  };
+
+  // ✅ LOADING STATE
+  if (loading) {
+    return <div className="p-10 text-gray-500">Loading profile...</div>;
+  }
+
+  // ✅ UI
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <main className="flex-1 p-8">
+        {/* Header WITH NOTIFICATIONS */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-semibold text-gray-800">My Profile</h1>
+          
+          {/* Notifications Button with Dropdown */}
+          <div className="relative" ref={notificationsRef}>
+            <button
+              onClick={toggleNotifications}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 font-medium relative"
+            >
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {showNotifications && (
+              <div className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
+                {/* Dropdown Header */}
+                <div className="flex justify-between items-center p-4 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-800">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Tout marquer comme lu
+                    </button>
+                  )}
+                </div>
+
+                {/* Notifications List */}
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      Aucune notification
+                    </div>
+                  ) : (
+                    notifications.map((notification) => {
+                      const IconComponent = notification.icon;
+                      return (
+                        <div
+                          key={notification.id}
+                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
+                            !notification.read ? 'bg-blue-50' : ''
+                          }`}
+                        >
+                          <div className="flex gap-3">
+                            <div className={`p-2 rounded-full ${
+                              notification.type === 'appointment' ? 'bg-blue-100 text-blue-600' :
+                              notification.type === 'reminder' ? 'bg-orange-100 text-orange-600' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              <IconComponent size={16} />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <h4 className="font-medium text-gray-800 text-sm">
+                                  {notification.title}
+                                </h4>
+                                {!notification.read && (
+                                  <button
+                                    onClick={() => markAsRead(notification.id)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                  >
+                                    <Check size={14} />
+                                  </button>
+                                )}
+                              </div>
+                              <p className="text-gray-600 text-sm mt-1">
+                                {notification.message}
+                              </p>
+                              <span className="text-xs text-gray-400 mt-2 block">
+                                {notification.time}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Dropdown Footer */}
+                <div className="p-3 border-t border-gray-100">
+                  <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    Voir toutes les notifications
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Profile Header Section */}
+        <ProfileSection
+          userData={userData}
+          formData={formData}
+          setFormData={setFormData}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          updateProfile={handleSave}
+          logout={handleLogout}
+        />
+
+        {/* Profile Info Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+          <div className="md:col-span-2 space-y-8">
+            <PersonalInformation
+              userData={formData}
+              isEditing={isEditing}
+              onChange={handleChange}
+            />
+            <MedicalConditions
+              userData={formData}
+              isEditing={isEditing}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="space-y-8">
+            <AccountActivity accountStats={accountStats} />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
