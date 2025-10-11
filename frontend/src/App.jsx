@@ -2,10 +2,10 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./PatientComponents/Layout.jsx";
 import AnalysePage from "./PatientComponents/Analyse_components/AnalysePage.jsx";
-import Dashboard from "./Collaborator/CDashboard.jsx";
-import CollaboratorLayout from "./Collaborator/CLayout.jsx";
-import CollaboratorProfile from "./Collaborator/CProfile.jsx";
-import RendezVousCollaborator from "./Collaborator/CRendezVous.jsx";
+import Dashboard from "./Components/CollaboratorComponent/Dashboard/CDashboard.jsx";
+import CollaboratorLayout from "./Components/CollaboratorComponent/Layout/CLayout.jsx";
+import CollaboratorProfile from "./Components/CollaboratorComponent/Profile/CProfile.jsx";
+import RendezVousCollaborator from "./Components/CollaboratorComponent/APPoinetements/CRendezVous.jsx";
 export default function App() {
   return (
     <Router>
