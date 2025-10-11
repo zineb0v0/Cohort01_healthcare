@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./Components/Pages/PatientComponents/Layout.js";
-import AnalysePage from "./Components/Pages/PatientComponents/Analyse_components/AnalysePage.js";
+import Layout from "./Components/Pages/PatientComponents/Layout.jsx";
+import AnalysePage from "./Components/Pages/PatientComponents/Analyse_components/AnalysePage.jsx";
 import Dashboard from "./Components/Pages/CollaboratorComponent/Dashboard/CDashboard.jsx";
 import CollaboratorLayout from "./Components/Pages/CollaboratorComponent/Layout/CLayout.jsx";
 import CollaboratorProfile from "./Components/Pages/CollaboratorComponent/Profile/CProfile.jsx";

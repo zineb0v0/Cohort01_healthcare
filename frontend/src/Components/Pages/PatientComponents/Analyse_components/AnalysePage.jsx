@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api from "../../lib/axios.js";
+import api from "../../../../lib/axios.js";
 import Uploader from "./Uploader";
 import AnalysisCard from "./AnalysisCard";
 

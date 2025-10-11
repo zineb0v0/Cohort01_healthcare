@@ -9,7 +9,6 @@ import {
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../../../lib/axios.js";
-
 export default function PatientSidebar() {
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
