@@ -76,8 +76,8 @@ class AuthController extends Controller
         // 5. Création du token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // 6. Dynamically load relations
-        $relations = ['profile']; // Always load profile
+        // 6.  load  relations Dynamically
+        $relations = ['profile']; // Always we load the profile
         if ($role === 'Patient') {
             $relations[] = 'patient';
         }
@@ -92,38 +92,39 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(Request $request)
-    {
-        // Validate the request data
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
 
-        // Attempt to authenticate the user with the provided credentials
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            throw ValidationException::withMessages(['message' => ['The provided credentials are incorrect.']]);
-        }
+public function login(Request $request)
+{
+    // Validate input
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string',
+    ]);
 
-        // Get the authenticated user
-        $user = User::where('email', $request->email)->firstOrFail();
+    // Find user by email
+    $user = User::where('email', $request->email)->first();
 
-        // Create a token for the user
-        $token = $user->createToken('auth_Token')->plainTextToken;
-
-        // Retrieve the role of the user (e.g., 'Patient', 'Collaborateur')
-        $role = $user->getRoleNames()->first();  // Assuming you are using Spatie roles
-
-        // Return the response with token, role, and other necessary data
+    // Check if user exists and password is correct
+    if (!$user || !Hash::check($request->password, $user->password)) {
         return response()->json([
-            'access_token' => $token,             // The authentication token
-            'role' => $role,                      // The role of the user (e.g., Patient or Collaborator)
-            'user' => $user->load(['profile', 'patient', 'collaborator']),  // Load the related models
-            // 'profile' => optional($user->profile),  // Include the profile, if exists
-            // 'patient' => optional($user->patient),  // Include patient details, if exists
-            // 'collaborator' => optional($user->collaborator),  // Include collaborator details, if exists
-        ]);
+            'message' => 'Email ou mot de passe incorrect'
+        ], 401); // 401 Unauthorized is more appropriate for API
     }
+
+    // Create Sanctum token
+    $token = $user->createToken('auth_Token')->plainTextToken;
+
+    // Get the user's role using Spatie
+    $role = $user->getRoleNames()->first();
+
+    // Return response with token, role, and related models
+    return response()->json([
+        'access_token' => $token,
+        'role' => $role,
+        'user' => $user->load(['profile', 'patient', 'collaborator']),
+    ]);
+}
+
 
     // Logout
     // public function logout(Request $request)

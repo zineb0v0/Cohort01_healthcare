@@ -36,7 +36,10 @@ Route::delete('/newsletter/{id}', [NeswletterEmailController::class, 'destroy'])
 Route::middleware('auth:sanctum')->group(function () {
     // Authenticated User Routes
     Route::get('/user', function () {
-        return response()->json(auth()->user()); // Return the authenticated user's data
+        $user = auth()->user()->load(['profile', 'patient', 'collaborator']); // Eager load relations
+        $user->role = $user->getRoleNames()->first(); // Add the role as a property
+
+        return response()->json($user);
     });
 
     Route::get('/me', [AuthController::class, 'me']);
@@ -50,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return auth()->user()->profile;
     });
 
+    Route::middleware('role:Collaborateur')->get('/collaborator/dashboard', [CollaboratorController::class, 'index']);
     // Protected Routes for Collaborator
     // Route::prefix('collaborator')->group(function () {
     //     Route::get('/appointments', [CollaboratorController::class, 'getCollaboratorAppointments']);
@@ -60,9 +64,8 @@ Route::middleware('auth:sanctum')->group(function () {
     //     Route::get('/profile', [CollaboratorController::class, 'getCollaboratorProfile']);
     //     Route::put('/profile', [CollaboratorController::class, 'updateCollaboratorProfile']);
     // });
-    Route::middleware(['auth:sanctum', 'role:Collaborateur'])->get('/collaborator/dashboard', [CollaboratorController::class, 'index']);
     // Protected Routes for Patient
-    Route::prefix('patient')->middleware(['auth:sanctum', 'role:Patient'])->group(function () {
+    Route::prefix('patient')->middleware('role:Patient')->group(function () {
         // Dashboard and CRUD for medications
         Route::get('/dashboard', [PatientController::class, 'dashboard']);
         Route::get('/medications', [MedicationController::class, 'index']);

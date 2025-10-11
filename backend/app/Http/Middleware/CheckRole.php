@@ -12,19 +12,27 @@ class CheckRole
      *
      * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
-    public function handle(Request $request, \Closure $next, $role)
+    public function handle(Request $request, Closure $next, $role)
     {
-        if (!Auth::check()) {
-            // Si l'utilisateur n'est pas connecté
-            return redirect('/authentication')->with('error', 'Veuillez vous connecter pour accéder à cette page.');
+        // Use the 'api' guard (Sanctum) explicitly
+        $user = Auth::guard('api')->user(); // for sanctum athentication
+
+        if (!$user) {
+            // Not authenticated
+            return response()->json([
+                'message' => 'non authentifié.',
+            ], 401);
         }
 
-        if (Auth::user()->role !== $role) {
-            // Si l'utilisateur n'a pas le bon rôle, redirection vers accueil
-            return redirect('/')->with('error', 'Accès refusé.');
+        // Using Spatie roles to check (for authorization)
+        if (!$user->hasRole($role)) {
+            // Authenticated but role is wrong
+            return response()->json([
+                'message' => 'role non autorisé',
+            ], 403);
         }
 
-        // passer la requête
+        // Everything is okay, we continue and passe the request to it specified controller action
         return $next($request);
     }
 }

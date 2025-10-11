@@ -1,7 +1,7 @@
-import { useLocation } from "react-router-dom"; // To get state from the location
+import { useLocation } from "react-router-dom"; // To get the state from the location
 import { useState, useEffect } from "react";
-import RegisterForm from "@/components/Auth/RegisterForm"; // Your Register Form component
-import LoginForm from "@/components/Auth/LoginForm"; // Your Login Form component
+import RegisterForm from "@/components/Auth/RegisterForm"; 
+import LoginForm from "@/components/Auth/LoginForm"; 
 export default function AuthenticationPage() {
   const location = useLocation();
   const [isRegister, setIsRegister] = useState(

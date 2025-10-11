@@ -35,32 +35,27 @@ export default function LoginForm() {
     formState: { errors },
   } = form;
 
-  const customToastStyle = {
-    backgroundColor: "#15a018",
-    color: "white",
-  };
-
   const onSubmit = async (data) => {
     try {
       console.log("Login data:", data);
 
       const response = await axios.post(
         "http://localhost:8000/api/login",
-        data,
-        { withCredentials: true }
+        data
       );
 
       console.log("Logged in:", response.data);
-      const { message, access_token, role, user } = response.data;
+      const { access_token, role, user } = response.data;
 
       localStorage.setItem("access_token", access_token);
       localStorage.setItem("role", role);
+      console.log(user);
 
       if (role === "Patient") {
-        toast.success("Connexion réussie !", { style: customToastStyle });
+        toast.success("Connexion réussie !");
         navigate("/patient/dashboard");
       } else if (role === "Collaborateur") {
-        toast.success("Connexion réussie !", { style: customToastStyle });
+        toast.success("Connexion réussie !");
         navigate("/collaborator/dashboard");
       } else {
         toast.error("Rôle non reconnu, veuillez contacter l’administrateur.");
@@ -70,12 +65,6 @@ export default function LoginForm() {
       reset();
     } catch (error) {
       console.error("Erreur lors de la connexion :", error);
-      toast.error("Échec de la connexion. Veuillez réessayer.", {
-        style: {
-          backgroundColor: "#dd160f",
-          color: "white",
-        },
-      });
     }
   };
 

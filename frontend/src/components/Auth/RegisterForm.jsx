@@ -25,10 +25,7 @@ export default function RegisterForm() {
   const initialTab = localStorage.getItem("tabValue") || "Patient";
   const [tabValue, setTabValue] = useState(initialTab);
   const navigate = useNavigate();
-  const customToastStyle = {
-    backgroundColor: "#15a018",
-    color: "white",
-  };
+
   const schema =
     tabValue === "Patient" ? patientRegisterSchema : collaboratorRegisterSchema;
 
@@ -95,9 +92,7 @@ export default function RegisterForm() {
         localStorage.setItem("user", JSON.stringify(response.data.user)); // Save user data
       }
 
-      toast.success("Inscription réussie !", {
-        style: customToastStyle,
-      });
+      toast.success("Inscription réussie !");
       // Get the role from the backend response and redirect accordingly
       const userRole = response.data.role; // This is the role from the backend
       console.log("User role from response:", userRole); // Log the role for debugging

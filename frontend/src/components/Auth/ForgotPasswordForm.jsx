@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "../../axios";
-import { toast } from "react-hot-toast"; 
+import { toast } from "react-hot-toast";
 import { Button } from "../ui/button";
 
 const ForgotPasswordForm = () => {
@@ -8,7 +8,6 @@ const ForgotPasswordForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(""); // General error message
   const [errors, setErrors] = useState([]); // Specific form validation errors
-
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
@@ -19,34 +18,24 @@ const ForgotPasswordForm = () => {
     try {
       // Send forgot password request
       const response = await axios.post(
-        "api/forgotPassword", // Your API endpoint
+        "api/forgotPassword", // the forgotpassword API endpoint
         { email: email }
       );
 
-      toast.success(response.data.message, {
-        style: {
-          backgroundColor: "#15a018",
-          color: "white",
-        },
-      });
-      setEmail(""); // Clear email field on success
+      toast.success(response.data.message);
+      setEmail(""); // Clear email field on success response
     } catch (error) {
       if (error.response?.status === 422) {
-        setErrors(error.response.data.errors); // Set form validation errors
+        setErrors(error.response.data.errors); // Setting the form validation errors
       }
       console.error("Error details:", error);
-      setError(error.response?.data?.message || "Something went wrong!");
+      setError(error.response?.data?.message || "Une erreur est survenue !");
       toast.error(
-        error.response?.data?.message || "Failed to send password reset link.",
-        {
-          style: {
-            backgroundColor: "var(--destructive)",
-            color: "white",
-          },
-        }
+        error.response?.data?.message ||
+          "Échec de l'envoi du lien de réinitialisation du mot de passe."
       );
     } finally {
-      setLoading(false); // Stop loading spinner
+      setLoading(false); //we Stop loading spinner
     }
   };
 

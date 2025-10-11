@@ -6,65 +6,67 @@ import { toast } from "react-hot-toast";
 
 function DashboardPatient() {
   const navigate = useNavigate();
-
-  const customToastSuccessStyle = {
-    backgroundColor: "#15800f",
-    color: "white",
-  };
-  const [role, setRole] = useState(null);
-  const [token, setToken] = useState("");
-
-
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
-      setToken(localStorage.getItem("access_token"));
-      setRole(localStorage.getItem("role"));
-
+      try {
+        const response = await axios.get("/api/user");
+        setUser(response.data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Impossible de récupérer les informations utilisateur.");
+      }
     };
 
     fetchUserData();
-  }, [navigate]);
-  console.log(role);
-  console.log(token);
-  if (!token || role !== "Patient") {
-    // Redirect if no token is found or the role is not Patient
-    navigate("/authentication");
-    return;
-  }
+  }, []);
 
   const handleLogout = async () => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      console.log("Token is missing, user is not logged in.");
-      return;
-    }
-
     try {
-      const response = await axios.post("/api/logout", {});
-
+      await axios.post("/api/logout");
       localStorage.removeItem("access_token");
-      toast.success("Déconnexion réussie", { style: customToastSuccessStyle });
+      localStorage.removeItem("role");
+      toast.success("Déconnexion réussie");
       navigate("/authentication");
     } catch (error) {
       console.error("Échec de la déconnexion", error);
+      toast.error("Erreur lors de la déconnexion.");
     }
   };
 
+  if (!user) return <p>Chargement...</p>;
+
   return (
-    <div>
-      <div className="flex items-center justify-evenly p-10">
-        <div>
-          <p className="text-sm">Role: {role}</p>
+    <div className="p-10">
+      <p className="text-sm">Role: {user.role}</p>
+
+      {user.profile && (
+        <div className="mt-4">
+          <p>Nom: {user.profile.first_name} {user.profile.last_name}</p>
+          <p>Téléphone: {user.profile.phone}</p>
+          <p>Adresse: {user.profile.address}</p>
+          <p>Date de naissance: {user.profile.date_birth}</p>
+          <p>Genre: {user.profile.gender}</p>
+          {user.profile.urgency_number && (
+            <p>Numéro d'urgence: {user.profile.urgency_number}</p>
+          )}
         </div>
-        <Button
-          className="bg-foreground/90 text-white text-lg py-2 px-4"
-          onClick={handleLogout}
-        >
-          Se déconnecter
-        </Button>
-      </div>
+      )}
+
+      {user.patient && (
+        <div className="mt-4">
+          <p>Patient ID: {user.patient.id}</p>
+          {/* Add more patient-specific fields if available */}
+        </div>
+      )}
+
+      <Button
+        className="bg-foreground/90 text-white text-lg py-2 px-4 mt-6"
+        onClick={handleLogout}
+      >
+        Se déconnecter
+      </Button>
     </div>
   );
 }

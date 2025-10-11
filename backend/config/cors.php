@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'paths' => ['api/*'],  // Allow  API routes
+    'paths' => ['api/*'],  // Allowing the  API routes
 
     'allowed_methods' => [
         'GET',
@@ -29,11 +29,11 @@ return [
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*', 'Authorization', 'Content-Type'],  // Allow necessary headers
+    'allowed_headers' => ['*'],  // Allow necessary headers
 
     'exposed_headers' => [],
 
     'max_age' => 0,
 
-    'supports_credentials' => true,  // Allow sending cookies with requests (important for Sanctum)
+    'supports_credentials' => false, // set to true ONLY if we use cookies
 ];
