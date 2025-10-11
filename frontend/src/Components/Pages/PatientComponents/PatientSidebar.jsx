@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import api from "../lib/axios.js";
+import api from "../../../lib/axios.js";
 
 export default function PatientSidebar() {
   const [profile, setProfile] = useState(null);

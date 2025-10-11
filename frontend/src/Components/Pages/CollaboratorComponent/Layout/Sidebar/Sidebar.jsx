@@ -8,7 +8,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
-import api from "../../../../lib/axios.js";
+import api from "../../../../../lib/axios.js";
 
 export default function Sidebar() {
   const [profile, setProfile] = useState(null);

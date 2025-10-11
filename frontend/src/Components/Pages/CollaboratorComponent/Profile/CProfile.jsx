@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../../lib/axios";
+import api from "../../../../lib/axios";
 import { User, Edit, CheckCircle, Phone, MapPin, Calendar, Star } from "lucide-react";
 
 export default function CollaboratorProfile() {
