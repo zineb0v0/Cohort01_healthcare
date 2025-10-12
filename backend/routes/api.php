@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
 
 
 /*
@@ -39,10 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', action: [AuthController::class, 'logout']);
 
     // Exemple : route protégée pour voir un profil
- Route::get('/profile', function () {
-        return auth()->user()->profile;
-    });
-
+Route::get('/profile', function () {
+    return Auth::user()->profile;
+});
     // Custom collaborator routes
      Route::get('/collaborator/appointments', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorAppointments']);
     Route::get('/collaborator/patients', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorPatients']);
