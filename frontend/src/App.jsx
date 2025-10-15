@@ -6,12 +6,14 @@ import Dashboard from "./Components/Pages/CollaboratorComponent/Dashboard/CDashb
 import CollaboratorLayout from "./Components/Pages/CollaboratorComponent/Layout/CLayout.jsx";
 import CollaboratorProfile from "./Components/Pages/CollaboratorComponent/Profile/CProfile.jsx";
 import RendezVousCollaborator from "./Components/Pages/CollaboratorComponent/APPoinetements/CRendezVous.jsx";
+import BookAppointment from "./Components/Pages/PatientComponents/BookAppointment.jsx";
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<AnalysePage />} />
+          <Route path="/bookappointment" element={<BookAppointment />} />
         </Route>
           <Route path="/collaborator" element={<CollaboratorLayout />}>
           <Route index element={<Dashboard />} />

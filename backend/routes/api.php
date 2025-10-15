@@ -44,7 +44,10 @@ Route::get('/profile', function () {
     return Auth::user()->profile;
 });
     // Custom collaborator routes
-     Route::get('/collaborator/appointments', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorAppointments']);
+    // f routes/api.php
+    Route::post('/appointments', [\App\Http\Controllers\AppointmentController::class, 'createAppointment']);
+    Route::get('/collaborators/available', [\App\Http\Controllers\CollaboratorController::class, 'getAvailableCollaborators']);
+    Route::get('/collaborator/appointments', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorAppointments']);
     Route::get('/collaborator/patients', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorPatients']);
     Route::post('/collaborator/appointments/{appointmentId}/confirm', [\App\Http\Controllers\CollaboratorController::class, 'confirmAppointment']);
     Route::post('/collaborator/appointments/{appointmentId}/cancel', [\App\Http\Controllers\CollaboratorController::class, 'cancelAppointment']);
