@@ -19,8 +19,7 @@ class Collaborator extends Model
     protected $keyType = 'string';
     protected $casts = [
     'isAvailable' => 'boolean',
-]   ;
-
+];
 
 
     protected $fillable = [

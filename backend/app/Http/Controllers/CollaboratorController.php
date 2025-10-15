@@ -127,7 +127,7 @@ class CollaboratorController extends Controller
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-
+        
         $collaborator = $user->collaborator;
         if (!$collaborator) {
             return response()->json(['error' => 'Collaborator not found for this user.'], 404);
@@ -159,7 +159,40 @@ class CollaboratorController extends Controller
                 ],
             ]
         ]);
-    }
+
+
+    // نحمّلو العلاقات
+    $user->load(['profile', 'collaborator', 'roles']);
+
+    return response()->json([
+        'user' => [
+            'id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->roles->pluck('name')->first(),
+            'profile' => $user->profile ? [
+                'first_name' => $user->profile->first_name,
+                'last_name' => $user->profile->last_name,
+                'phone' => $user->profile->phone,
+                'address' => $user->profile->address,
+                'date_birth' => $user->profile->date_birth,
+                'gender' => $user->profile->gender,
+                'emergency_contact' => $user->profile->emergency_contact,
+            ] : null,
+            'collaborator' => [
+                'speciality' => $collaborator->speciality,
+                'licenseNumber' => $collaborator->licenseNumber,
+                'workplace' => $collaborator->workplace,
+                'availability' => $collaborator->availability,
+                'isAvailable' => $collaborator->isAvailable,
+                'rating' => $collaborator->rating,
+                'created_at' => $collaborator->created_at,
+                'updated_at' => $collaborator->updated_at,
+            ],
+        ]
+    ]);
+}
+
+
 
     // Update collaborator profile
     public function updateCollaboratorProfile(Request $request)

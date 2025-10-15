@@ -89,6 +89,8 @@ class AuthController extends Controller
             'access_token' => $token,
             'user' => $user->load($relations),
             'role' => $role,
+            'token_type' => 'Bearer',
+            'user' => $user->load(['profile', 'patient','collaborator']),
         ]);
     }
 
