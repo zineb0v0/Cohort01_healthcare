@@ -1,38 +1,57 @@
 // Uploader.jsx
 import React, { useState } from "react";
 import api from "../../../lib/axios";
-
 export default function Uploader({ onUploaded }) {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleUpload = async () => {
-    if (!file) return alert("Choisir un fichier !");
-    setLoading(true);
+ const handleUpload = async () => {
+  if (!file) return alert("Choisir un fichier !");
+  setLoading(true);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+  try {
+    const profileRes = await api.get("/api/me", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
 
-      const res = await api.post("http://127.0.0.1:8000/api/analyses", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      onUploaded(res.data);
-      setFile(null);
-      setIsOpen(false); // fermer la popup après upload
-    } catch (err) {
-      console.error(err);
-      alert("Erreur upload !");
-    } finally {
+    const patientId = profileRes.data.patient?.id;  
+    if (!patientId) {
+      alert("Impossible de récupérer l'ID du patient !");
       setLoading(false);
+      return;
     }
-  };
+
+    // 🔹 2. إعداد FormData
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("patient_id", patientId);
+
+    // 🔹 3. Envoi vers API analyses
+    const res = await api.post("http://127.0.0.1:8000/api/analyses", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    onUploaded(res.data);
+    setFile(null);
+    setIsOpen(false);
+  } catch (err) {
+    console.error(err);
+    alert("Erreur upload !");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>
-      {/* Bouton principal */}
+      
       <div className="absolute top-6 right-6">
         <button
           onClick={() => setIsOpen(true)}
