@@ -17,6 +17,8 @@ import CollaboratorLayout from "./components/Collaborator/layout/CLayout.jsx";
 import CollaboratorProfile from "./components/Collaborator/CProfile.jsx";
 import RendezVousCollaborator from "./components/Collaborator/CRendezVous.jsx";
 
+
+
 // Temporary placeholder for pages not yet developed
 const ComingSoonPage = ({ pageName }) => (
   <div className="flex items-center justify-center h-64">
@@ -43,7 +45,7 @@ export default function App() {
           <Route path="medications" element={<ComingSoonPage pageName="Médicaments" />} />
           <Route path="appointments" element={<ComingSoonPage pageName="Rendez-vous" />} />
           <Route path="settings" element={<ComingSoonPage pageName="Paramètres" />} />
-          <Route path="reports" element={<ComingSoonPage pageName="Rapports" />} />
+          <Route path="reports" element={<AnalysePage/>} />
         </Route>
 
         {/* Default redirect if someone opens "/" */}
