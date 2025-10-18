@@ -13,5 +13,11 @@ class Analysis extends Model
         'type',
         'result',
         'result_file',
+        'patient_id',
     ];
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
 }

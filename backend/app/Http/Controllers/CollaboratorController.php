@@ -9,6 +9,21 @@ use App\Models\User;
 class CollaboratorController extends Controller
 {
     // Get appointments for the authenticated collaborator
+    // f CollaboratorController.php
+
+// Get all collaborators with full data
+// CollaboratorController.php
+public function getAvailableCollaborators()
+{
+    $collaborators = \App\Models\Collaborator::with([
+        'user.profile',
+        'user.roles'
+    ])->where('isAvailable', true)->get();
+
+    return response()->json($collaborators);
+}
+
+
     public function getCollaboratorAppointments()
     {
         $user = Auth::user();

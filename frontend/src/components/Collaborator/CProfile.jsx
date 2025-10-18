@@ -19,14 +19,14 @@ export default function CollaboratorProfile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("access_token");
         if (!token) return setLoading(false);
 
         const res = await api.get("/api/collaborator/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const user = res.data?.user;
+        const user = res.data?.user || res.data; 
         if (!user) {
           setProfile(null);
           return;
@@ -87,7 +87,7 @@ export default function CollaboratorProfile() {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("access_token");
       const res = await api.put("/api/collaborator/profile", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });

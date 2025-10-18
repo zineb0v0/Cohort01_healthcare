@@ -11,16 +11,18 @@ const PersonalInformation = ({ userData, isEditing, onChange }) => {
 
       <div className="grid grid-cols-2 gap-6">
         {[
-          { label: "Full Name", value: userData.name, type: "text", name: "name" },
+          { label: "First Name", value: userData.first_name, type: "text", name: "first_name" },
+          { label: "Last Name", value: userData.last_name, type: "text", name: "last_name" },
           { label: "Email Address", value: userData.email, type: "email", name: "email" },
           { label: "Phone Number", value: userData.phone, type: "tel", name: "phone" },
-          { label: "Date of Birth", value: userData.dateBirth, type: "text", name: "dateBirth" },
+          { label: "Date of Birth", value: userData.date_birth, type: "date", name: "date_birth" },
           { label: "Address", value: userData.address, type: "text", name: "address", full: true },
-          { label: "Emergency Contact", value: userData.emergencyContact, type: "text", name: "emergencyContact", full: true },
+          { label: "Emergency Contact", value: userData.emergency_contact, type: "tel", name: "emergency_contact", full: true },
         ].map((field, index) => (
           <div key={index} className={field.full ? "col-span-2" : ""}>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {field.label}
+
             </label>
             <input
               type={field.type}

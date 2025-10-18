@@ -18,7 +18,7 @@ class Collaborator extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     protected $casts = [
-    'isAvailable' => 'boolean',
+    'availability' => 'boolean',
 ];
 
 
@@ -58,5 +58,16 @@ class Collaborator extends Model
     public function patients()
     {
         return $this->hasManyThrough(Patient::class, Appointment::class, 'collaborator_id', 'id', 'id', 'patient_id');
+    }
+
+    // Dans ton modèle Collaborator, ajoute :
+    public function getIsAvailableAttribute()
+    {
+        return (bool) $this->attributes['availability'];
+    }
+
+    public function setIsAvailableAttribute($value)
+    {
+        $this->attributes['availability'] = $value;
     }
 }

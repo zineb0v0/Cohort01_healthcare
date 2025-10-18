@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
 
 
 /*
@@ -42,22 +43,36 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Exemple : route protégée pour voir un profil
     Route::get('/profile', function () {
-    $profile = auth()->user()->profile;
-    return [
-        'id' => $profile->id,
-        'first_name' => $profile->first_name,
-        'last_name' => $profile->last_name,
-        'phone' => $profile->phone,
-        'address' => $profile->address,
-        'date_birth' => $profile->date_birth,
-        'gender' => $profile->gender,
-        'emergency_contact' => $profile->emergency_contact,
-        'email' => auth()->user()->email, 
-    ];
-    });
+        $user = auth()->user();
+        $profile = $user->profile;
+
+        if ($user->patient) {
+        $userType = 'patient';
+        } elseif ($user->collaborator) {
+        $userType = 'collaborator';
+        } else {
+        $userType = 'unknown';
+        }
+        
+        return [
+            'id' => $profile->id,
+            'first_name' => $profile->first_name,
+            'last_name' => $profile->last_name,
+            'phone' => $profile->phone,
+            'address' => $profile->address,
+            'date_birth' => $profile->date_birth,
+            'gender' => $profile->gender,
+            'emergency_contact' => $profile->emergency_contact,
+            'email' => auth()->user()->email, 
+            'user_type' => $userType,
+        ];
+        });
 
     // Custom collaborator routes
-     Route::get('/collaborator/appointments', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorAppointments']);
+    // f routes/api.php
+    Route::post('/appointments', [\App\Http\Controllers\AppointmentController::class, 'createAppointment']);
+    Route::get('/collaborators/available', [\App\Http\Controllers\CollaboratorController::class, 'getAvailableCollaborators']);
+    Route::get('/collaborator/appointments', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorAppointments']);
     Route::get('/collaborator/patients', [\App\Http\Controllers\CollaboratorController::class, 'getCollaboratorPatients']);
     Route::post('/collaborator/appointments/{appointmentId}/confirm', [\App\Http\Controllers\CollaboratorController::class, 'confirmAppointment']);
     Route::post('/collaborator/appointments/{appointmentId}/cancel', [\App\Http\Controllers\CollaboratorController::class, 'cancelAppointment']);
@@ -81,10 +96,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->put('/profile', function () {
     $profile = auth()->user()->profile;
+    $user = auth()->user();
 
     request()->validate([
         'first_name' => 'string|max:255',
         'last_name' => 'string|max:255',
+        'email' => 'required|email|max:255|unique:users,email,' . $user->id,
         'phone' => 'string|max:20',
         'address' => 'string|max:255',
         'date_birth' => 'date',
@@ -92,6 +109,7 @@ Route::middleware('auth:sanctum')->put('/profile', function () {
         'emergency_contact' => 'nullable|string|max:20',
     ]);
 
+    // Update profile fields
     $profile->update(request()->only([
         'first_name',
         'last_name',
@@ -102,5 +120,17 @@ Route::middleware('auth:sanctum')->put('/profile', function () {
         'emergency_contact',
     ]));
 
-    return response()->json($profile);
+    // Update email in users table
+    $user->update(['email' => request('email')]);
+
+    return response()->json([
+        'first_name' => $profile->first_name,
+        'last_name' => $profile->last_name,
+        'phone' => $profile->phone,
+        'address' => $profile->address,
+        'date_birth' => $profile->date_birth,
+        'gender' => $profile->gender,
+        'emergency_contact' => $profile->emergency_contact,
+        'email' => $user->email,
+    ]);
 });

@@ -11,12 +11,13 @@ import {
 import Layout from "./components/PatientComponents/layout/Layout.jsx";
 import ProfilePage from "./pages/patient/ProfilePage.jsx";
 import AnalysePage from "./components/PatientComponents/Analyse_components/AnalysePage.jsx";
+import BookAppointment from "./components/PatientComponents/BookAppointment.jsx";
+
 // === Collaborator Components ===
 import Dashboard from "./components/Collaborator/CDashboard.jsx";
 import CollaboratorLayout from "./components/Collaborator/layout/CLayout.jsx";
 import CollaboratorProfile from "./components/Collaborator/CProfile.jsx";
 import RendezVousCollaborator from "./components/Collaborator/CRendezVous.jsx";
-
 
 
 // Temporary placeholder for pages not yet developed
@@ -43,7 +44,7 @@ export default function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="dashboard" element={<ComingSoonPage pageName="Tableau de Bord" />} />
           <Route path="medications" element={<ComingSoonPage pageName="Médicaments" />} />
-          <Route path="appointments" element={<ComingSoonPage pageName="Rendez-vous" />} />
+          <Route path="appointments" element={<BookAppointment/>} />
           <Route path="settings" element={<ComingSoonPage pageName="Paramètres" />} />
           <Route path="reports" element={<AnalysePage/>} />
         </Route>
@@ -52,6 +53,8 @@ export default function App() {
         <Route path="/" element={<Navigate to="/patient/profile" replace />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<AnalysePage />} />
+          <Route path="/bookappointment" element={<BookAppointment />} />
+
         </Route>
         
         {/* === Collaborator Routes === */}

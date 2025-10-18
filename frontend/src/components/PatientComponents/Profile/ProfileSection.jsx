@@ -14,10 +14,10 @@ const ProfileSection = ({ userData, isEditing,formData, setIsEditing , updatePro
         {/* User info */}
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
-            {userData.name || "John Doe"}
+            {userData.first_name} {userData.last_name}
           </h2>
           <p className="text-gray-500 text-sm">
-            {userData.email || "patient@demo.com"}
+            {userData.email || "No email"}
           </p>
 
           {/* Badges */}
@@ -48,10 +48,11 @@ const ProfileSection = ({ userData, isEditing,formData, setIsEditing , updatePro
       </button>
 
         <button
+          onClick={logout}
           className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-500 font-medium"
         >
           <LogOut size={12} />
-          Loggout
+          Logout
         </button>
         
       </div>

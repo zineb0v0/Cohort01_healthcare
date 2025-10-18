@@ -17,9 +17,20 @@ class Appointment extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'date', 'time', 'status',
-        'patient_id', 'collaborator_id',
-        'isTelehealth', 'telehealthLink',
+        'id', 
+        'patient_id', 
+        'collaborator_id', 
+        'medical_dossier_id',
+        'datetime',           // Your actual column name
+        'start_time',         // Your actual column name  
+        'status',
+        'type',               // Your actual column name
+        'is_telehealth',      // Your actual column name
+        'telehealth_url',     // Your actual column name
+        'notes',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
 
     public function patient()
