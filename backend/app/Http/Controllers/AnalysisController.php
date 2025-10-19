@@ -167,7 +167,6 @@ $analysis = Analysis::create([
     'patient_id' => $request->patient_id,
 ]);
 
-// ✅ Retourner les données complètes
 return response()->json($analysis, 201, [], JSON_UNESCAPED_UNICODE);
 
     }
