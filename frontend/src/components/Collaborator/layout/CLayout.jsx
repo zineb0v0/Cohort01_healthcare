@@ -6,9 +6,8 @@ export default function CollaboratorLayout() {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <div className="flex-1 p-4 pt-16 lg:pl-64">
-        <Outlet /> 
+        <Outlet />
       </div>
     </div>
   );
 }
-

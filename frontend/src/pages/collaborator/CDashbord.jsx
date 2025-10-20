@@ -1,21 +1,16 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import api from "../../lib/axios";
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({
-    appointmentsCount: 0,
-    patientsCount: 0,
-    confirmedAppointments: 0,
-    canceledAppointments: 0,
-    doctorName: "",
-  });
+  const [stats, setStats] = useState(null); // null to show loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("token");
 
+        // Fetch all in parallel
         const [appointmentsRes, patientsRes, collaboratorRes] = await Promise.all([
           api.get("/api/collaborator/appointments", {
             headers: { Authorization: `Bearer ${token}` },
@@ -25,31 +20,51 @@ export default function Dashboard() {
           }),
           api.get("/api/profile", {
             headers: { Authorization: `Bearer ${token}` },
-          }), // 👈 endpoint qui renvoie le user connecté (avec profile)
+          }),
         ]);
 
         const appointments = appointmentsRes.data;
+        const patients = patientsRes.data;
+        const collaborator = collaboratorRes.data;
 
-        // ✅ Compter les rendez-vous
-        const confirmed = appointments.filter(a => a.status === "confirmed").length;
-        const canceled = appointments.filter(a => a.status === "canceled").length;
+        // Count confirmed and canceled in a single loop
+        const { confirmed, canceled } = appointments.reduce(
+          (acc, a) => {
+            if (a.status === "confirmed") acc.confirmed++;
+            if (a.status === "canceled") acc.canceled++;
+            return acc;
+          },
+          { confirmed: 0, canceled: 0 }
+        );
 
-        // ✅ Extraire nom du collaborateur depuis user.profile
-        const doctorName = `${collaboratorRes.data.first_name} ${collaboratorRes.data.last_name}`;
+        const doctorName = collaborator?.profile
+          ? `${collaborator.profile.first_name} ${collaborator.profile.last_name}`
+          : "";
+
         setStats({
           appointmentsCount: appointments.length,
-          patientsCount: patientsRes.data.length || 0,
+          patientsCount: patients.length,
           confirmedAppointments: confirmed,
           canceledAppointments: canceled,
           doctorName,
         });
       } catch (err) {
         console.error("Erreur lors du chargement du dashboard:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
+
+  if (loading || !stats) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-gray-500 text-lg">         ⏳ Chargement du tableau de bord...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -81,9 +96,7 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-10 bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            Résumé rapide
-          </h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Résumé rapide</h2>
           <p className="text-gray-600">
             Vous avez actuellement <strong>{stats.appointmentsCount}</strong> rendez-vous,
             dont <strong>{stats.confirmedAppointments}</strong> confirmés et{" "}

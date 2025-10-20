@@ -2,29 +2,33 @@
 
 namespace Database\Factories;
 
+use App\Models\Appointment;
+use App\Models\Patient;
+use App\Models\Collaborator;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Appointment>
- */
 class AppointmentFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Appointment::class;
+
     public function definition(): array
     {
+        // Pick random existing patient and collaborator
+        $patient = Patient::inRandomOrder()->first();
+        $collaborator = Collaborator::inRandomOrder()->first();
+
         return [
-            'id' => $this->faker->uuid(),
-            'patient_id' => \App\Models\Patient::factory(),
-            'collaborator_id' => 'aff66a73-3ad3-4330-a0f0-591c0e1bf188',
-            'date' => $this->faker->date(),
-            'time' => $this->faker->time(),
+            'id' => Str::uuid()->toString(),
+            'patient_id' => $patient ? $patient->id : Str::uuid(),
+            'collaborator_id' => $collaborator ? $collaborator->id : Str::uuid(),
+            'date' => $this->faker->dateTimeBetween('+1 days', '+1 month'),
+            'time' => $this->faker->time('H:i:s'),
             'status' => $this->faker->randomElement(['pending', 'confirmed', 'canceled']),
-            'isTelehealth' => $this->faker->boolean(),
-            'telehealthLink' => $this->faker->optional()->url(),
+            'is_telehealth' => $this->faker->boolean(30), // 30% chance
+            'telehealth_url' => $this->faker->boolean(30) ? $this->faker->url() : null,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

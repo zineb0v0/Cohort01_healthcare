@@ -139,7 +139,7 @@ export default function RendezVousCollaborator() {
                         {a.status}
                       </td>
                       <td className="py-3 px-4">
-                        {a.isTelehealth ? (
+                        {a.is_telehealth ? (
                           <span className="text-blue-600 font-medium">
                             Téléconsultation
                           </span>
@@ -148,9 +148,9 @@ export default function RendezVousCollaborator() {
                         )}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
-                        {a.telehealthLink ? (
+                        {a.telehealth_url ? (
                           <a
-                            href={a.telehealthLink}
+                            href={a.telehealth_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-500 underline hover:text-blue-700 transition-colors"
@@ -210,7 +210,7 @@ export default function RendezVousCollaborator() {
                     Statut: {a.status}
                   </p>
                   <p className="text-sm text-gray-500">
-                    Type: {a.isTelehealth ? "Téléconsultation" : "Présentiel"}
+                    Type: {a.is_telehealth ? "Téléconsultation" : "Présentiel"}
                   </p>
                   
                   <div className="flex flex-wrap gap-2 mt-2">

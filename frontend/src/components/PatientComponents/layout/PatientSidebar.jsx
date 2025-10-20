@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../../../lib/axios";
-
+import toast from "react-hot-toast";
 export default function PatientSidebar() {
   const [profile, setProfile] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -37,16 +37,21 @@ export default function PatientSidebar() {
   // Déconnexion
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("access_token");
-      await api.post(
-        "/api/logout",
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post("/api/logout");
+
       localStorage.removeItem("access_token");
-      navigate("/login");
-    } catch (err) {
-      console.error("Erreur lors de la déconnexion:", err);
+      localStorage.removeItem("role");
+
+      const rememberEmail = localStorage.getItem("remember_email");
+      if (!rememberEmail) {
+        localStorage.removeItem("remember_email");
+      }
+
+      toast.success("Déconnexion réussie");
+      navigate("/authentication", { replace: true });
+    } catch (error) {
+      console.error("Échec de la déconnexion", error);
+      toast.error("Erreur lors de la déconnexion.");
     }
   };
 
@@ -75,11 +80,31 @@ export default function PatientSidebar() {
 
         {/* Navigation */}
         <nav className="mt-2 space-y-2">
-          <SidebarLink to="/patient/dashboard" icon={<FaHome />} label="Tableau de bord" />
-          <SidebarLink to="/patient/profile" icon={<FaUser />} label="Mon profil" />
-          <SidebarLink to="/patient/appointments" icon={<FaCalendarAlt />} label="Rendez-vous" />
-          <SidebarLink to="/patient/medications" icon={<FaPills />} label="Médicaments" />
-          <SidebarLink to="/patient/reports" icon={<FaFileMedical />} label="Rapports médicaux" />
+          <SidebarLink
+            to="/patient/dashboard"
+            icon={<FaHome />}
+            label="Tableau de bord"
+          />
+          <SidebarLink
+            to="/patient/profile"
+            icon={<FaUser />}
+            label="Mon profil"
+          />
+          <SidebarLink
+            to="/patient/appointments"
+            icon={<FaCalendarAlt />}
+            label="Rendez-vous"
+          />
+          <SidebarLink
+            to="/patient/medications"
+            icon={<FaPills />}
+            label="Médicaments"
+          />
+          <SidebarLink
+            to="/patient/reports"
+            icon={<FaFileMedical />}
+            label="Rapports médicaux"
+          />
         </nav>
 
         {/* Infos utilisateur + Déconnexion */}
@@ -102,12 +127,12 @@ export default function PatientSidebar() {
             </div>
           </div>
 
-          <NavLink
+          {/* <NavLink
             to="/patient/settings"
             className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg w-full text-left mb-2"
           >
             <FaCog /> Paramètres
-          </NavLink>
+          </NavLink> */}
 
           <button
             onClick={handleLogout}

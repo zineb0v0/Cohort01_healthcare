@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import api from "../../lib/axios";
-import { User, Edit, CheckCircle, Phone, MapPin, Calendar, Star, XCircle } from "lucide-react";
+import {
+  User,
+  Edit,
+  CheckCircle,
+  Phone,
+  MapPin,
+  Calendar,
+  Star,
+  XCircle,
+} from "lucide-react";
 
 export default function CollaboratorProfile() {
   const [profile, setProfile] = useState(null);
@@ -26,7 +35,7 @@ export default function CollaboratorProfile() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const user = res.data?.user || res.data; 
+        const user = res.data?.user || res.data;
         if (!user) {
           setProfile(null);
           return;
@@ -85,71 +94,90 @@ export default function CollaboratorProfile() {
     setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
   };
 
-  const handleSave = async () => {
-    try {
-      const token = localStorage.getItem("access_token");
-      const res = await api.put("/api/collaborator/profile", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+const handleSave = async () => {
+  // Remove non-digit characters to count actual digits
+  const digitsOnly = formData.phone.replace(/\D/g, "");
 
-      const user = res.data.user;
-      const p = user.profile || {};
-      const c = user.collaborator || {};
+  // Validate phone: only digits, optional +, spaces, -, ()
+  const phonePattern = /^[\d+\-() ]*$/;
 
-      const mergedProfile = {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        first_name: p.first_name,
-        last_name: p.last_name,
-        phone: p.phone,
-        address: p.address,
-        date_birth: p.date_birth,
-        gender: p.gender,
-        emergency_contact: p.emergency_contact,
-        speciality: c.speciality,
-        licenseNumber: c.licenseNumber,
-        workplace: c.workplace,
-        isAvailable: c.isAvailable,
-        availability: c.availability,
-        rating: c.rating,
-        updated_at: c.updated_at,
-      };
+  if (formData.phone && !phonePattern.test(formData.phone)) {
+    showAlert("Le numéro de téléphone ne peut pas contenir de lettres.", "error");
+    return;
+  }
 
-      setProfile(mergedProfile);
-      setFormData(mergedProfile);
-      setEditMode(false);
-      showAlert("✅ Profil mis à jour avec succès !", "success");
-    } catch (err) {
-      console.error(err);
-      showAlert("❌ Erreur lors de la mise à jour du profil.", "error");
-    }
-  };
+  if (digitsOnly.length > 15) {
+    showAlert("Le numéro de téléphone ne peut pas dépasser 15 chiffres.", "error");
+    return;
+  }
+
+  try {
+    setEditMode(false);
+
+    const payload = {
+      email: formData.email || "",
+      first_name: formData.first_name || "",
+      last_name: formData.last_name || "",
+      phone: formData.phone ? String(formData.phone) : "",
+      address: formData.address ? String(formData.address) : "",
+      date_birth: formData.date_birth ? String(formData.date_birth) : "",
+      gender: formData.gender || "",
+      emergency_contact: formData.emergency_contact || "",
+      speciality: formData.speciality || "",
+      licenseNumber: formData.licenseNumber || "",
+      workplace: formData.workplace || "",
+      availability: formData.availability ? String(formData.availability) : "",
+      isAvailable: formData.isAvailable ? 1 : 0,
+    };
+
+    const token = localStorage.getItem("access_token");
+    const res = await api.put("/api/collaborator/profile", payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    showAlert("Profil mis à jour avec succès.", "success");
+  } catch (error) {
+    console.error("🔴 Update Profile Error:", error.response?.data || error);
+    showAlert(
+      error.response?.data?.message || "Échec de la mise à jour du profil.",
+      "error"
+    );
+  }
+};
+
 
   const toggleAvailability = async () => {
     try {
-      const updatedStatus = !profile.isAvailable;
-      setProfile({ ...profile, isAvailable: updatedStatus });
-      setFormData({ ...formData, isAvailable: updatedStatus });
+      // Toggle local state first
+      setFormData((prev) => ({
+        ...prev,
+        isAvailable: !prev.isAvailable,
+      }));
 
-      const token = localStorage.getItem("token");
-      await api.put(
-        "/api/collaborator/profile",
-        { ...formData, isAvailable: updatedStatus ? 1 : 0 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const payload = {
+        ...formData,
+        availability: formData.availability
+          ? String(formData.availability)
+          : "",
+        isAvailable: !formData.isAvailable ? 1 : 0, // toggle
+      };
 
-      showAlert(
-        updatedStatus
-          ? "🟢 Vous êtes maintenant disponible."
-          : "🔴 Vous êtes maintenant occupé.",
-        "success"
+      // 🔹 Log payload
+      console.log("Payload toggle availability:", payload);
+
+      const token = localStorage.getItem("access_token");
+      const res = await api.put("/api/collaborator/profile", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("✅ Disponibilité mise à jour:", res.data);
+      showAlert("Disponibilité mise à jour avec succès.", "success");
+    } catch (error) {
+      console.error(
+        "🔴 Toggle availability error:",
+        error.response?.data || error
       );
-    } catch (err) {
-      console.error("Erreur lors du changement de disponibilité:", err);
-      setProfile((prev) => ({ ...prev, isAvailable: !prev.isAvailable }));
-      setFormData((prev) => ({ ...prev, isAvailable: !prev.isAvailable }));
-      showAlert("⚠️ Une erreur est survenue.", "error");
+      showAlert("Échec de la mise à jour de la disponibilité.", "error");
     }
   };
 
@@ -302,7 +330,15 @@ function AlertMessage({ message, type }) {
 }
 
 // 🔹 InfoCard
-function InfoCard({ icon, label, value, name, editMode, onChange, type = "text" }) {
+function InfoCard({
+  icon,
+  label,
+  value,
+  name,
+  editMode,
+  onChange,
+  type = "text",
+}) {
   return (
     <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 hover:shadow-md transition-all duration-200">
       <div className="flex items-center gap-2 text-blue-600 font-medium mb-2">

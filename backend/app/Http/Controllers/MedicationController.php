@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Medication;
 use App\Models\Patient;
 use Illuminate\Http\Request;
@@ -37,7 +36,6 @@ class MedicationController extends Controller
             'as_needed_prn' => 'boolean',
         ]);
 
-
         $patient = Patient::where('user_id', $request->user()->id)->first();
 
         $medication = Medication::create([
@@ -68,7 +66,7 @@ class MedicationController extends Controller
         $medication->update($request->only([
             'medication_name', 'dosage', 'unit', 'frequency', 'start_date', 'end_date',
             'prescribed_by', 'reminder_schedule', 'instructions', 'possible_side_effects',
-            'take_with_food', 'as_needed_prn'
+            'take_with_food', 'as_needed_prn',
         ]));
 
         return response()->json($medication);

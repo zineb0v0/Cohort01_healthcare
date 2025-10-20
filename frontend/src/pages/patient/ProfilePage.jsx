@@ -4,31 +4,39 @@ import PersonalInformation from "../../components/PatientComponents/Profile/Pers
 import MedicalConditions from "../../components/PatientComponents/Profile/MedicalConditions";
 import AccountActivity from "../../components/PatientComponents/Profile/AccountActivity";
 import api from "../../services/api";
-import { Bell, Check, Calendar, AlertCircle, Info } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
+import { Bell, Check, Calendar, AlertCircle, Info } from "lucide-react";
+import toast from "react-hot-toast";
 export default function ProfilePage() {
   const [userData, setUserData] = useState({
     first_name: "",
     last_name: "",
-    email: "", 
+    email: "",
     phone: "",
-    date_birth: "", 
+    date_birth: "",
     address: "",
     allergies: "None reported",
     emergency_contact: "",
   });
+  const navigate = useNavigate();
+
   const [userRole, setUserRole] = useState(null);
   const [formData, setFormData] = useState({ ...userData });
   const [accountStats, setAccountStats] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   // ✅ NOTIFICATIONS STATES
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationsRef = useRef(null);
-  const [notification, setNotification] = useState({ show: false, message: "", type: "" });
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
 
   // ✅ SYNC FORM DATA WHEN USERDATA UPDATES
   useEffect(() => {
@@ -47,9 +55,9 @@ export default function ProfilePage() {
           last_name: response.data.last_name || "",
           email: response.data.email || "",
           phone: response.data.phone || "",
-          date_birth: response.data.date_birth || "", 
+          date_birth: response.data.date_birth || "",
           address: response.data.address || "",
-          emergency_contact: response.data.emergency_contact || "", 
+          emergency_contact: response.data.emergency_contact || "",
           allergies: response.data.allergies || "None reported",
         });
       } catch (error) {
@@ -90,10 +98,11 @@ export default function ProfilePage() {
         id: 1,
         type: "appointment",
         title: "Rendez-vous confirmé",
-        message: "Votre rendez-vous avec Dr. Smith est confirmé pour demain à 14:00",
+        message:
+          "Votre rendez-vous avec Dr. Smith est confirmé pour demain à 14:00",
         time: "Il y a 5 min",
         read: false,
-        icon: Calendar
+        icon: Calendar,
       },
       {
         id: 2,
@@ -102,7 +111,7 @@ export default function ProfilePage() {
         message: "N'oubliez pas de prendre votre traitement",
         time: "Il y a 1 heure",
         read: false,
-        icon: AlertCircle
+        icon: AlertCircle,
       },
       {
         id: 3,
@@ -111,7 +120,7 @@ export default function ProfilePage() {
         message: "Découvrez notre nouveau système de suivi de santé",
         time: "Il y a 2 heures",
         read: true,
-        icon: Info
+        icon: Info,
       },
       {
         id: 4,
@@ -120,18 +129,21 @@ export default function ProfilePage() {
         message: "Rendez-vous dentaire dans 3 jours à 10:00",
         time: "Il y a 1 jour",
         read: true,
-        icon: Calendar
-      }
+        icon: Calendar,
+      },
     ];
 
     setNotifications(mockNotifications);
-    setUnreadCount(mockNotifications.filter(n => !n.read).length);
+    setUnreadCount(mockNotifications.filter((n) => !n.read).length);
   }, []);
 
   // ✅ CLOSE NOTIFICATIONS WHEN CLICKING OUTSIDE
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target)
+      ) {
         setShowNotifications(false);
       }
     };
@@ -150,20 +162,20 @@ export default function ProfilePage() {
 
   // ✅ MARK NOTIFICATION AS READ
   const markAsRead = (notificationId) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === notificationId 
+    setNotifications((prev) =>
+      prev.map((notification) =>
+        notification.id === notificationId
           ? { ...notification, read: true }
           : notification
       )
     );
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    setUnreadCount((prev) => Math.max(0, prev - 1));
   };
 
   // ✅ MARK ALL AS READ
   const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, read: true }))
     );
     setUnreadCount(0);
   };
@@ -188,7 +200,7 @@ export default function ProfilePage() {
         setNotification({
           show: true,
           message: "Please enter your first name",
-          type: "warning"
+          type: "warning",
         });
         return;
       }
@@ -197,7 +209,7 @@ export default function ProfilePage() {
         setNotification({
           show: true,
           message: "Please enter your last name",
-          type: "warning"
+          type: "warning",
         });
         return;
       }
@@ -206,7 +218,7 @@ export default function ProfilePage() {
         setNotification({
           show: true,
           message: "Please enter your email address",
-          type: "warning"
+          type: "warning",
         });
         return;
       }
@@ -217,7 +229,7 @@ export default function ProfilePage() {
         setNotification({
           show: true,
           message: "Please enter a valid email address",
-          type: "warning"
+          type: "warning",
         });
         return;
       }
@@ -227,7 +239,7 @@ export default function ProfilePage() {
         setNotification({
           show: true,
           message: "Please enter a valid phone number",
-          type: "warning"
+          type: "warning",
         });
         return;
       }
@@ -236,13 +248,13 @@ export default function ProfilePage() {
       if (formData.date_birth) {
         const birthDate = new Date(formData.date_birth);
         const today = new Date();
-        const minDate = new Date('1900-01-01');
+        const minDate = new Date("1900-01-01");
 
         if (isNaN(birthDate.getTime())) {
           setNotification({
             show: true,
             message: "Please enter a valid date of birth",
-            type: "warning"
+            type: "warning",
           });
           return;
         }
@@ -251,7 +263,7 @@ export default function ProfilePage() {
           setNotification({
             show: true,
             message: "Date of birth cannot be in the future",
-            type: "warning"
+            type: "warning",
           });
           return;
         }
@@ -260,18 +272,21 @@ export default function ProfilePage() {
           setNotification({
             show: true,
             message: "Please enter a realistic date of birth",
-            type: "warning"
+            type: "warning",
           });
           return;
         }
       }
 
       // Emergency contact validation
-      if (formData.emergency_contact && !/^[\+]?[0-9\s\-\(\)]{10,}$/.test(formData.emergency_contact)) {
+      if (
+        formData.emergency_contact &&
+        !/^[\+]?[0-9\s\-\(\)]{10,}$/.test(formData.emergency_contact)
+      ) {
         setNotification({
           show: true,
           message: "Please enter a valid emergency contact number",
-          type: "warning"
+          type: "warning",
         });
         return;
       }
@@ -281,16 +296,16 @@ export default function ProfilePage() {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
-        phone: formData.phone || '',
-        address: formData.address || '',
-        date_birth: formData.date_birth || '',
-        emergency_contact: formData.emergency_contact || '',
-        gender: formData.gender || 'other'
+        phone: formData.phone || "",
+        address: formData.address || "",
+        date_birth: formData.date_birth || "",
+        emergency_contact: formData.emergency_contact || "",
+        gender: formData.gender || "",
       };
 
       // Remove empty fields to avoid validation issues
-      Object.keys(updateData).forEach(key => {
-        if (updateData[key] === '') {
+      Object.keys(updateData).forEach((key) => {
+        if (updateData[key] === "") {
           delete updateData[key];
         }
       });
@@ -299,7 +314,7 @@ export default function ProfilePage() {
 
       // Make API call to update profile
       const response = await api.put("/profile", updateData);
-      
+
       console.log("Profile updated successfully:", response.data);
 
       // Update local state with the response from server
@@ -318,38 +333,54 @@ export default function ProfilePage() {
       setNotification({
         show: true,
         message: "Profile updated successfully!",
-        type: "success"
+        type: "success",
       });
 
       // Auto hide success notification after 3 seconds
       setTimeout(() => {
         setNotification({ show: false, message: "", type: "" });
       }, 3000);
-
     } catch (error) {
       console.error("Error saving profile:", error);
-      
+
       let errorMessage = "Failed to save profile. Please try again.";
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.errors) {
         const errors = Object.values(error.response.data.errors).flat();
-        errorMessage = `Validation errors: ${errors.join(', ')}`;
+        errorMessage = `Validation errors: ${errors.join(", ")}`;
       }
 
       setNotification({
         show: true,
         message: errorMessage,
-        type: "error"
+        type: "error",
       });
     }
   };
 
   // ✅ LOGOUT HANDLER
-  const handleLogout = () => {
-    console.log("User logged out");
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+    try {
+      await api.post("/logout");
+
+      // Suppression du token et le rôle
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("role");
+
+      // Suppression de l'email uniquement si l'utilisateur n'a pas coché "Remember Me"
+      const rememberEmail = localStorage.getItem("remember_email");
+      if (!rememberEmail) {
+        localStorage.removeItem("remember_email");
+      }
+
+      toast.success("Déconnexion réussie");
+      navigate("/authentication", { replace: true });
+    } catch (error) {
+      console.error("Échec de la déconnexion", error);
+      toast.error("Erreur lors de la déconnexion.");
+    }
   };
 
   // ✅ LOADING STATE
@@ -364,21 +395,25 @@ export default function ProfilePage() {
     const bgColor = {
       success: "bg-green-50 border-green-200",
       error: "bg-red-50 border-red-200",
-      warning: "bg-yellow-50 border-yellow-200"
+      warning: "bg-yellow-50 border-yellow-200",
     }[notification.type];
 
     const textColor = {
       success: "text-green-800",
       error: "text-red-800",
-      warning: "text-yellow-800"
+      warning: "text-yellow-800",
     }[notification.type];
 
     return (
-      <div className={`fixed top-4 right-4 z-50 border rounded-lg p-4 shadow-lg ${bgColor} ${textColor} max-w-sm`}>
+      <div
+        className={`fixed top-4 right-4 z-50 border rounded-lg p-4 shadow-lg ${bgColor} ${textColor} max-w-sm`}
+      >
         <div className="flex items-center justify-between">
           <span>{notification.message}</span>
-          <button 
-            onClick={() => setNotification({ show: false, message: "", type: "" })}
+          <button
+            onClick={() =>
+              setNotification({ show: false, message: "", type: "" })
+            }
             className="ml-4 text-gray-500 hover:text-gray-700"
           >
             ✕
@@ -396,7 +431,7 @@ export default function ProfilePage() {
         {/* Header WITH NOTIFICATIONS */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-semibold text-gray-800">My Profile</h1>
-          
+
           {/* Notifications Button with Dropdown */}
           <div className="relative" ref={notificationsRef}>
             <button
@@ -440,15 +475,19 @@ export default function ProfilePage() {
                         <div
                           key={notification.id}
                           className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-                            !notification.read ? 'bg-blue-50' : ''
+                            !notification.read ? "bg-blue-50" : ""
                           }`}
                         >
                           <div className="flex gap-3">
-                            <div className={`p-2 rounded-full ${
-                              notification.type === 'appointment' ? 'bg-blue-100 text-blue-600' :
-                              notification.type === 'reminder' ? 'bg-orange-100 text-orange-600' :
-                              'bg-gray-100 text-gray-600'
-                            }`}>
+                            <div
+                              className={`p-2 rounded-full ${
+                                notification.type === "appointment"
+                                  ? "bg-blue-100 text-blue-600"
+                                  : notification.type === "reminder"
+                                  ? "bg-orange-100 text-orange-600"
+                                  : "bg-gray-100 text-gray-600"
+                              }`}
+                            >
                               <IconComponent size={16} />
                             </div>
                             <div className="flex-1">

@@ -1,7 +1,7 @@
 // src/components/PatientComponents/layout/Layout.jsx
 import React from "react";
 import { Outlet, NavLink } from "react-router-dom";
-import PatientSidebar from "./PatientSidebar.jsx";
+import PatientSidebar from "./PatientSidebar";
 
 
 export default function Layout() {

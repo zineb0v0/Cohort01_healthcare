@@ -2,27 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 class CollaboratorController extends Controller
 {
     // Get appointments for the authenticated collaborator
     // f CollaboratorController.php
 
-// Get all collaborators with full data
-// CollaboratorController.php
-public function getAvailableCollaborators()
-{
-    $collaborators = \App\Models\Collaborator::with([
-        'user.profile',
-        'user.roles'
-    ])->where('isAvailable', true)->get();
+    // Get all collaborators with full data
+    // CollaboratorController.php
+    public function getAvailableCollaborators()
+    {
+        $collaborators = \App\Models\Collaborator::with([
+            'user.profile',
+            'user.roles',
+        ])->where('isAvailable', true)->get();
 
-    return response()->json($collaborators);
-}
-
+        return response()->json($collaborators);
+    }
 
     public function getCollaboratorAppointments()
     {
@@ -40,7 +39,7 @@ public function getAvailableCollaborators()
                 },
                 'collaborator.user.profile' => function ($query) {
                     $query->select('id', 'user_id', 'first_name', 'last_name');
-                }
+                },
             ])
             ->get();
 
@@ -58,6 +57,7 @@ public function getAvailableCollaborators()
         }
 
         $patients = $collaborator->patients()->with('user.profile')->get()->unique('id')->values();
+
         return response()->json($patients);
     }
 
@@ -137,18 +137,21 @@ public function getAvailableCollaborators()
     public function getCollaboratorProfile()
     {
         $authUser = auth()->user();
+
+        // Load user with relationships
         $user = User::with(['profile', 'collaborator', 'roles'])->find($authUser->id);
 
         if (!$user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
-        
+
         $collaborator = $user->collaborator;
         if (!$collaborator) {
             return response()->json(['error' => 'Collaborator not found for this user.'], 404);
         }
 
-        return response()->json([
+        // Prepare the data to return
+        $data = [
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,
@@ -172,42 +175,11 @@ public function getAvailableCollaborators()
                     'created_at' => $collaborator->created_at,
                     'updated_at' => $collaborator->updated_at,
                 ],
-            ]
-        ]);
-
-
-    // نحمّلو العلاقات
-    $user->load(['profile', 'collaborator', 'roles']);
-
-    return response()->json([
-        'user' => [
-            'id' => $user->id,
-            'email' => $user->email,
-            'role' => $user->roles->pluck('name')->first(),
-            'profile' => $user->profile ? [
-                'first_name' => $user->profile->first_name,
-                'last_name' => $user->profile->last_name,
-                'phone' => $user->profile->phone,
-                'address' => $user->profile->address,
-                'date_birth' => $user->profile->date_birth,
-                'gender' => $user->profile->gender,
-                'emergency_contact' => $user->profile->emergency_contact,
-            ] : null,
-            'collaborator' => [
-                'speciality' => $collaborator->speciality,
-                'licenseNumber' => $collaborator->licenseNumber,
-                'workplace' => $collaborator->workplace,
-                'availability' => $collaborator->availability,
-                'isAvailable' => $collaborator->isAvailable,
-                'rating' => $collaborator->rating,
-                'created_at' => $collaborator->created_at,
-                'updated_at' => $collaborator->updated_at,
             ],
-        ]
-    ]);
-}
+        ];
 
-
+        return response()->json($data);
+    }
 
     // Update collaborator profile
     public function updateCollaboratorProfile(Request $request)
@@ -221,14 +193,14 @@ public function getAvailableCollaborators()
         }
 
         $validated = $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             // Profile fields
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:255',
+            'phone' => 'nullable|regex:/^\+?\d{1,15}$/',
             'address' => 'nullable|string|max:255',
             'date_birth' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,other',
+            'gender' => 'nullable|in:homme,femme',
             'emergency_contact' => 'nullable|string|max:255',
             // Collaborator fields
             'speciality' => 'nullable|string|max:255',

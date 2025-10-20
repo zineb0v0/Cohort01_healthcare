@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'appointments';
 
@@ -17,21 +18,30 @@ class Appointment extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 
-        'patient_id', 
-        'collaborator_id', 
-        'medical_dossier_id',
-        'datetime',           // Your actual column name
-        'start_time',         // Your actual column name  
+        'id',
+        'patient_id',
+        'collaborator_id',
+        'date',           // Your actual column name
+        'time',         // Your actual column name
         'status',
         'type',               // Your actual column name
         'is_telehealth',      // Your actual column name
         'telehealth_url',     // Your actual column name
-        'notes',
-        'created_at',
-        'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
+    protected $casts = [
+        'is_telehealth' => 'boolean',
+        'date' => 'datetime',
+        'time' => 'datetime:H:i',
+    ];
+    protected $dates = ['deleted_at'];
+
+    // Status constants
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_CONFIRMED = 'confirmed';
+    // public const STATUS_REJECTED = 'rejected';
+    public const STATUS_CANCELLED = 'canceled';
+    public const STATUS_COMPLETED = 'completed';
 
     public function patient()
     {
@@ -41,5 +51,47 @@ class Appointment extends Model
     public function collaborator()
     {
         return $this->belongsTo(Collaborator::class);
+    }
+
+    public function medicalDossier()
+    {
+        return $this->belongsTo(MedicalDossier::class, 'medical_dossier_id', 'id');
+    }
+
+    // Scopes for easier querying
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    public function scopeConfirmed($query)
+    {
+        return $query->where('status', self::STATUS_CONFIRMED);
+    }
+
+    public function scopeForPatient($query, $patientId)
+    {
+        return $query->where('patient_id', $patientId);
+    }
+
+    public function scopeForCollaborator($query, $collaboratorId)
+    {
+        return $query->where('collaborator_id', $collaboratorId);
+    }
+
+    // Helper methods
+    public function isPending()
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function isConfirmed()
+    {
+        return $this->status === self::STATUS_CONFIRMED;
+    }
+
+    public function canBeCancelled()
+    {
+        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_CONFIRMED]);
     }
 }

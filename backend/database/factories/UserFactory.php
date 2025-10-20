@@ -2,43 +2,24 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    protected $model = User::class;
+    protected $model = \App\Models\User::class;
 
     public function definition(): array
     {
         return [
+            'id' => Str::uuid()->toString(),
             'email' => $this->faker->unique()->safeEmail(),
-            'password' => Hash::make('password'), // mot de passe par défaut
+            'email_verified_at' => now(),
+            'password' => Hash::make('password123'), // default password
+            'remember_token' => Str::random(10),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
-    }
-
-    public function configure()
-    {
-        return $this->afterCreating(function (User $user) {
-            // Crée automatiquement un profil pour cet utilisateur
-            $user->profile()->create([
-                'first_name' => $this->faker->firstName(),
-                'last_name' => $this->faker->lastName(),
-                'phone' => $this->faker->phoneNumber(),
-                'address' => $this->faker->address(),
-                'date_birth' => $this->faker->date(),
-                'gender' => $this->faker->randomElement(['male', 'female', 'other']),
-                'emergency_contact' => $this->faker->phoneNumber(),
-            ]);
-        });
     }
 }

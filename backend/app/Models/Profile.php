@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+// use Illuminate\Support\Str;
+
 class Profile extends Model
 {
     use HasFactory;
@@ -15,6 +17,7 @@ class Profile extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
+        'id',
         'first_name',
         'last_name',
         'phone',

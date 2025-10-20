@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../../../lib/axios";
-
+import toast from "react-hot-toast";
 export default function Sidebar() {
   const [profile, setProfile] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -34,16 +34,21 @@ export default function Sidebar() {
   // Déconnexion
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("access_token");
-      await api.post(
-        "/api/logout",
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      localStorage.removeItem("token");
-      navigate("/login");
-    } catch (err) {
-      console.error("Erreur lors de la déconnexion:", err);
+      await api.post("/api/logout");
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("role");
+
+      const rememberEmail = localStorage.getItem("remember_email");
+      if (!rememberEmail) {
+        localStorage.removeItem("remember_email");
+      }
+
+      toast.success("Déconnexion réussie");
+      navigate("/authentication", { replace: true });
+    } catch (error) {
+      console.error("Échec de la déconnexion", error);
+      toast.error("Erreur lors de la déconnexion.");
     }
   };
 
@@ -72,13 +77,21 @@ export default function Sidebar() {
 
         {/* 🔹 Navigation */}
         <nav className=" pb-70 lg:pb-40 space-y-2">
-          <SidebarLink to="/collaborator" icon={<FaHome />} label="Tableau de bord" />
+          <SidebarLink
+            to="/collaborator"
+            icon={<FaHome />}
+            label="Tableau de bord"
+          />
           <SidebarLink
             to="/collaborator/rendezvous"
             icon={<FaCalendarAlt />}
             label="Rendez-vous"
           />
-          <SidebarLink to="/collaborator/profile" icon={<FaUser />} label="Profil" />
+          <SidebarLink
+            to="/collaborator/profile"
+            icon={<FaUser />}
+            label="Profil"
+          />
         </nav>
 
         {/* 🔹 Infos utilisateur */}
