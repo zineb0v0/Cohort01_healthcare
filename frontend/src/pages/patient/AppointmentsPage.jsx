@@ -31,7 +31,9 @@ export default function BookAppointment() {
  useEffect(() => {
   setLoadingCollaborators(true);
   api.get("/api/collaborators/available")
-    .then(res => {   
+    .then(res => {
+      console.log("Raw collaborators response:", res); // <--- ajouter ça
+      console.log("res.data:", res.data);
       setCollaborators(res.data); // si res.data est bien un tableau
     })
     .catch(err => {
@@ -44,6 +46,7 @@ export default function BookAppointment() {
 
   const handleSubmit = () => {
     const token = localStorage.getItem("access_token");
+
     if (!selectedCollaborator || !date || !time) {
       alert("Veuillez remplir tous les champs !");
       return;
@@ -56,9 +59,7 @@ export default function BookAppointment() {
       collaborator_id: selectedCollaborator,
       date,
       time: formattedTime,
-      type,
-      is_telehealth: isTelehealth,
-  telehealth_url: isTelehealth ? "https://meet.google.com/example" : null
+      type
     })
     .then(() => alert("Rendez-vous réservé !"))
     .catch((err) => {
@@ -99,7 +100,7 @@ export default function BookAppointment() {
 
       <h3>Date & Heure</h3>
       <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-      <input type="time" step={1} value={time} onChange={e => setTime(e.target.value)} />
+      <input type="time" value={time} onChange={e => setTime(e.target.value)} />
 
       <button onClick={handleSubmit} disabled={!patientId || collaborators.length === 0}>
         Réserver
