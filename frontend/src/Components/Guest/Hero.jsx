@@ -26,7 +26,7 @@ export default function Hero() {
       {/* Animated background image */}
       <motion.div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('bg-herosection.png')" }}
+        style={{ backgroundImage: "url('bg-herosection2.png')" }}
         variants={bgVariant}
         initial="hidden"
         animate="visible"

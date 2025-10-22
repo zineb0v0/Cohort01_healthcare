@@ -37,8 +37,8 @@ export default function Dashboard() {
           { confirmed: 0, canceled: 0 }
         );
 
-        const doctorName = collaborator?.profile
-          ? `${collaborator.profile.first_name} ${collaborator.profile.last_name}`
+        const doctorName = collaborator.user?.profile
+          ? `${collaborator.user.profile.first_name} ${collaborator.user.profile.last_name}`
           : "";
 
         setStats({

@@ -76,7 +76,7 @@ export default function Sidebar() {
         </div>
 
         {/* 🔹 Navigation */}
-        <nav className=" pb-70 lg:pb-40 space-y-2">
+        <nav className=" pb-20 lg:pb-40 space-y-2">
           <SidebarLink
             to="/collaborator"
             icon={<FaHome />}

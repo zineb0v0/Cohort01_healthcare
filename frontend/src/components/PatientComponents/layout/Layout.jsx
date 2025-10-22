@@ -13,7 +13,7 @@ export default function Layout() {
       
     
       {/* Main content area */}
-      <main className="flex-1 p-4 pt-16 lg:pl-64">
+      <main className="flex-1 p-4  lg:pl-64">
         <Outlet />
       </main>
     </div>

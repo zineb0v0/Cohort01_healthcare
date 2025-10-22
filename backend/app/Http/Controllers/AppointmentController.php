@@ -28,9 +28,10 @@ public function createAppointment(Request $request)
         'datetime' => $datetime,                    // Use actual column name
         'start_time' => $validated['time'],         // Use actual column name
         'status' => 'pending',
+        'date' => $validated['date'],
         'type' => $validated['type'],               // Use actual column name
-        'is_telehealth' => in_array($validated['type'], ['appel','appel_video']),
-        'telehealth_url' => $validated['type'] == 'appel_video' ? 'https://zoom.link/'.Str::random(10) : null, // Use actual column name
+   'isTelehealth' => in_array($validated['type'], ['appel','appel_video']),
+    'telehealthLink' => $validated['type'] == 'appel_video' ? 'https://zoom.link/'.Str::random(10) : null,// Use actual column name
         ]);
 
     return response()->json([

@@ -95,7 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/appointments', [AppointmentController::class, 'createAppointment']);
     });
     // Patient Routes
-    Route::middleware('role:Patient')->prefix('patient')->group(function () {
+    Route::middleware('role:Patient')->prefix( 'patient')->group(function () {
         Route::get('/dashboard', [PatientController::class, 'dashboard']);
         Route::get('/account-activity', [ProfileController::class, 'accountActivity']);
         Route::get('/appointments', [PatientController::class, 'listAppointments']);
