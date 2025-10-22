@@ -194,15 +194,13 @@ class CollaboratorController extends Controller
 
         $validated = $request->validate([
             'email' => 'required|email|unique:users,email,'.$user->id,
-            // Profile fields
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'nullable|regex:/^\+?\d{1,15}$/',
             'address' => 'nullable|string|max:255',
             'date_birth' => 'nullable|date',
-            'gender' => 'nullable|in:homme,femme',
+            'gender' => 'nullable|in:male,female,other',
             'emergency_contact' => 'nullable|string|max:255',
-            // Collaborator fields
             'speciality' => 'nullable|string|max:255',
             'licenseNumber' => 'nullable|string|max:255',
             'workplace' => 'nullable|string|max:255',

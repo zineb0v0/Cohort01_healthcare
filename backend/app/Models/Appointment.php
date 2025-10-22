@@ -27,12 +27,11 @@ class Appointment extends Model
         'type',               // Your actual column name
         'is_telehealth',      // Your actual column name
         'telehealth_url',     // Your actual column name
-        'deleted_at',
     ];
     protected $casts = [
         'is_telehealth' => 'boolean',
         'date' => 'datetime',
-        'time' => 'datetime:H:i',
+        'time' => 'string',
     ];
     protected $dates = ['deleted_at'];
 

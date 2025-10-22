@@ -8,7 +8,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("access_token");
 
         // Fetch all in parallel
         const [appointmentsRes, patientsRes, collaboratorRes] = await Promise.all([
@@ -18,7 +18,7 @@ export default function Dashboard() {
           api.get("/api/collaborator/patients", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          api.get("/api/profile", {
+          api.get("/api/collaborator/profile", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

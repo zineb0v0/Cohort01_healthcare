@@ -15,7 +15,6 @@ public function createAppointment(Request $request)
         'date' => 'required|date',
         'time' => 'required|date_format:H:i:s',
         'type' => 'required|in:presentiel,appel,appel_video',// type de rendez-vous
-        'medical_dossier_id' => 'nullable|uuid|exists:medical_dossiers,id',
     ]);
 
     $datetime = $validated['date'] . ' ' . $validated['time'];
@@ -29,8 +28,8 @@ public function createAppointment(Request $request)
         'start_time' => $validated['time'],         // Use actual column name
         'status' => 'pending',
         'type' => $validated['type'],               // Use actual column name
-        'is_telehealth' => in_array($validated['type'], ['appel','appel_video']),
-        'telehealth_url' => $validated['type'] == 'appel_video' ? 'https://zoom.link/'.Str::random(10) : null, // Use actual column name
+   'is_telehealth' => $request->input('is_telehealth', false),
+    'telehealth_url' => $request->input('telehealth_url', null),// Use actual column name
         ]);
 
     return response()->json([

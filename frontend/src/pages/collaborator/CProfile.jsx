@@ -1,22 +1,14 @@
+// src/components/Collaborator/CProfile.jsx
 import { useEffect, useState } from "react";
 import api from "../../lib/axios";
-import {
-  User,
-  Edit,
-  CheckCircle,
-  Phone,
-  MapPin,
-  Calendar,
-  Star,
-  XCircle,
-} from "lucide-react";
+import { User, Edit, CheckCircle, Phone, MapPin, Calendar, Star, XCircle } from "lucide-react";
 
 export default function CollaboratorProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
-  const [alert, setAlert] = useState({ message: "", type: "" }); // 🔹 Nouveau
+  const [alert, setAlert] = useState({ message: "", type: "" });
 
   // 🔹 Afficher une alerte pendant 3 secondes
   const showAlert = (message, type = "success") => {
@@ -36,10 +28,7 @@ export default function CollaboratorProfile() {
         });
 
         const user = res.data?.user || res.data;
-        if (!user) {
-          setProfile(null);
-          return;
-        }
+        if (!user) return setProfile(null);
 
         const p = user.profile || {};
         const c = user.collaborator || {};
@@ -94,99 +83,85 @@ export default function CollaboratorProfile() {
     setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
   };
 
-const handleSave = async () => {
-  // Remove non-digit characters to count actual digits
-  const digitsOnly = formData.phone.replace(/\D/g, "");
+  const handleSave = async () => {
+    // Validation du numéro
+    const digitsOnly = formData.phone.replace(/\D/g, "");
+    const phonePattern = /^[\d+\-() ]*$/;
 
-  // Validate phone: only digits, optional +, spaces, -, ()
-  const phonePattern = /^[\d+\-() ]*$/;
+    if (formData.phone && !phonePattern.test(formData.phone)) {
+      showAlert("Le numéro de téléphone ne peut pas contenir de lettres.", "error");
+      return;
+    }
+    if (digitsOnly.length > 15) {
+      showAlert("Le numéro de téléphone ne peut pas dépasser 15 chiffres.", "error");
+      return;
+    }
 
-  if (formData.phone && !phonePattern.test(formData.phone)) {
-    showAlert("Le numéro de téléphone ne peut pas contenir de lettres.", "error");
-    return;
-  }
+    // Validation du genre
+    const validGenders = ["male", "female", "other"];
+    if (!validGenders.includes(formData.gender)) {
+      showAlert("Veuillez sélectionner un genre valide.", "error");
+      return;
+    }
 
-  if (digitsOnly.length > 15) {
-    showAlert("Le numéro de téléphone ne peut pas dépasser 15 chiffres.", "error");
-    return;
-  }
-
-  try {
-    setEditMode(false);
-
-    const payload = {
-      email: formData.email || "",
-      first_name: formData.first_name || "",
-      last_name: formData.last_name || "",
-      phone: formData.phone ? String(formData.phone) : "",
-      address: formData.address ? String(formData.address) : "",
-      date_birth: formData.date_birth ? String(formData.date_birth) : "",
-      gender: formData.gender || "",
-      emergency_contact: formData.emergency_contact || "",
-      speciality: formData.speciality || "",
-      licenseNumber: formData.licenseNumber || "",
-      workplace: formData.workplace || "",
-      availability: formData.availability ? String(formData.availability) : "",
-      isAvailable: formData.isAvailable ? 1 : 0,
-    };
-
-    const token = localStorage.getItem("access_token");
-    const res = await api.put("/api/collaborator/profile", payload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    showAlert("Profil mis à jour avec succès.", "success");
-  } catch (error) {
-    console.error("🔴 Update Profile Error:", error.response?.data || error);
-    showAlert(
-      error.response?.data?.message || "Échec de la mise à jour du profil.",
-      "error"
-    );
-  }
-};
-
-
-  const toggleAvailability = async () => {
     try {
-      // Toggle local state first
-      setFormData((prev) => ({
-        ...prev,
-        isAvailable: !prev.isAvailable,
-      }));
-
+      setEditMode(false);
       const payload = {
-        ...formData,
-        availability: formData.availability
-          ? String(formData.availability)
-          : "",
-        isAvailable: !formData.isAvailable ? 1 : 0, // toggle
+        email: formData.email || "",
+        first_name: formData.first_name || "",
+        last_name: formData.last_name || "",
+        phone: formData.phone ? String(formData.phone) : "",
+        address: formData.address ? String(formData.address) : "",
+        date_birth: formData.date_birth ? String(formData.date_birth) : "",
+        gender: formData.gender || "",
+        emergency_contact: formData.emergency_contact || "",
+        speciality: formData.speciality || "",
+        licenseNumber: formData.licenseNumber || "",
+        workplace: formData.workplace || "",
+        availability: formData.availability ? String(formData.availability) : "",
+        isAvailable: formData.isAvailable ? 1 : 0,
       };
-
-      // 🔹 Log payload
-      console.log("Payload toggle availability:", payload);
 
       const token = localStorage.getItem("access_token");
       const res = await api.put("/api/collaborator/profile", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("✅ Disponibilité mise à jour:", res.data);
+      showAlert("Profil mis à jour avec succès.", "success");
+    } catch (error) {
+      console.error("🔴 Update Profile Error:", error.response?.data || error);
+      showAlert(
+        error.response?.data?.message || "Échec de la mise à jour du profil.",
+        "error"
+      );
+    }
+  };
+
+  const toggleAvailability = async () => {
+    try {
+      setFormData((prev) => ({ ...prev, isAvailable: !prev.isAvailable }));
+
+      const payload = {
+        ...formData,
+        availability: formData.availability ? String(formData.availability) : "",
+        isAvailable: !formData.isAvailable ? 1 : 0,
+      };
+
+      const token = localStorage.getItem("access_token");
+      const res = await api.put("/api/collaborator/profile", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       showAlert("Disponibilité mise à jour avec succès.", "success");
     } catch (error) {
-      console.error(
-        "🔴 Toggle availability error:",
-        error.response?.data || error
-      );
+      console.error("🔴 Toggle availability error:", error.response?.data || error);
       showAlert("Échec de la mise à jour de la disponibilité.", "error");
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 md:px-10 relative">
-      {/* 🔹 Alerte personnalisée */}
-      {alert.message && (
-        <AlertMessage message={alert.message} type={alert.type} />
-      )}
+      {alert.message && <AlertMessage message={alert.message} type={alert.type} />}
 
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         {/* HEADER */}
@@ -273,8 +248,7 @@ const handleSave = async () => {
             editMode={editMode}
             onChange={handleChange}
           />
-          <InfoCard
-            icon={<User />}
+          <GenderCard
             label="Genre"
             name="gender"
             value={formData.gender}
@@ -282,7 +256,7 @@ const handleSave = async () => {
             onChange={handleChange}
           />
           <InfoCard
-            icon={<User />}
+            icon={<MapPin />}
             label="Lieu de travail"
             name="workplace"
             value={formData.workplace}
@@ -310,7 +284,7 @@ const handleSave = async () => {
   );
 }
 
-// 🔹 Alerte personnalisée
+// 🔹 Alert
 function AlertMessage({ message, type }) {
   const bgColor =
     type === "success"
@@ -330,15 +304,7 @@ function AlertMessage({ message, type }) {
 }
 
 // 🔹 InfoCard
-function InfoCard({
-  icon,
-  label,
-  value,
-  name,
-  editMode,
-  onChange,
-  type = "text",
-}) {
+function InfoCard({ icon, label, value, name, editMode, onChange, type = "text" }) {
   return (
     <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 hover:shadow-md transition-all duration-200">
       <div className="flex items-center gap-2 text-blue-600 font-medium mb-2">
@@ -355,6 +321,43 @@ function InfoCard({
         />
       ) : (
         <p className="text-gray-800 font-semibold">{value || "—"}</p>
+      )}
+    </div>
+  );
+}
+
+// 🔹 GenderCard avec select
+function GenderCard({ label, value, name, editMode, onChange }) {
+  const genderOptions = [
+    { value: "", label: "Sélectionner" },
+    { value: "male", label: "male" },
+    { value: "female", label: "female" },
+    { value: "other", label: "other" },
+  ];
+
+  return (
+    <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 hover:shadow-md transition-all duration-200">
+      <div className="flex items-center gap-2 text-blue-600 font-medium mb-2">
+        <User />
+        <span>{label}</span>
+      </div>
+      {editMode ? (
+        <select
+          name={name}
+          value={value || ""}
+          onChange={onChange}
+          className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          {genderOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <p className="text-gray-800 font-semibold">
+          {genderOptions.find((opt) => opt.value === value)?.label || "—"}
+        </p>
       )}
     </div>
   );
