@@ -47,7 +47,7 @@ export default function AnalysePage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#c8e0f8] p-6 flex flex-col items-center">
+    <div className="relative min-h-screen bg-gray-50 p-6 flex flex-col items-center">
       <div className="mb-12">
         <Uploader onUploaded={handleUploaded} />
       </div>

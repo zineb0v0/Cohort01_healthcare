@@ -1,5 +1,6 @@
 import { Phone, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 export default function About() {
   const fadeInUp = {
@@ -42,9 +43,12 @@ export default function About() {
         variants={fadeInUp}
         transition={{ duration: 0.8, delay: 0.4 }}
       >
-        <button className="bg-[#001f42]/94 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:scale-103  hover:bg-[#001f42] transition">
+         <Link
+          to="/contact"
+          className="bg-[#001f42]/94 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:scale-105 hover:bg-[#001f42] transition"
+        >
           Contactez-nous <ArrowRight className="w-4 h-4" />
-        </button>
+        </Link>
 
         <div className="flex items-center gap-3 text-[#0F1D3B]">
           <Phone className="w-5 h-5" />

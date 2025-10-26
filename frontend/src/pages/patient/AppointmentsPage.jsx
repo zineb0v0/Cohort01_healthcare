@@ -78,7 +78,7 @@ export default function BookAppointment() {
     return <p className="text-center text-red-500 mt-20">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex justify-center items-center py-10 relative">
+    <div className="min-h-screen bg-gray-50 flex justify-center items-center py-10 relative">
       {/* ✅ Notification animée */}
       <AnimatePresence>
         {notification && (

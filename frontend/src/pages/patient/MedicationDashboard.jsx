@@ -129,7 +129,7 @@ export default function MedicationDashboard() {
   };
 
   return (
-    <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
+<div className="space-y-6 p-4 sm:p-6 bg-gray-50 min-h-screen overflow-x-hidden">
       <AddMedicationModal 
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
@@ -138,7 +138,7 @@ export default function MedicationDashboard() {
       />
       
       <div className="bg-white rounded-lg p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
               <Clock className="w-5 h-5 text-gray-600" />
