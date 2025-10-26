@@ -11,11 +11,11 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->uuid('patient_id');
             $table->uuid('medication_id');
-            $table->date('intake_date')->nullable();
 
-            $table->json('scheduled_time')->nullable();
-            $table->json('taken_time')->nullable();
-            $table->json('status')->nullable();
+            $table->dateTime('scheduled_time');   // Heure prévue de la prise
+            $table->dateTime('taken_time')->nullable(); // Heure réelle de la prise
+            $table->enum('status', ['scheduled', 'taken', 'missed', 'late'])->default('scheduled'); // Nouveau champ status
+
             $table->timestamps();
 
             $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');

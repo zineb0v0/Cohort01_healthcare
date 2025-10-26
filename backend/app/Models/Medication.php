@@ -4,13 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+
 
 class Medication extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -39,19 +38,12 @@ class Medication extends Model
         'instructions',
         'possible_side_effects',
         'take_with_food',
-        'as_needed_prn',
-    ];
-    protected $casts = [
-        'take_with_food' => 'boolean',
-        'as_needed_prn' => 'boolean',
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'reminder_schedule' => 'string',
+        'as_needed_prn'
     ];
 
     public function patient()
     {
-        return $this->belongsTo(Patient::class, 'patient_id', 'id');
+        return $this->belongsTo(Patient::class);
     }
 
     public function analyses()

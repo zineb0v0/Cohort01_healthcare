@@ -139,16 +139,15 @@ class AuthController extends Controller
     // In AuthController
     public function me(Request $request)
     {
-        $user = $request->user(); // Get the authenticated user
+        $user = $request->user();
 
-        // Return basic user data along with the profile and role
         return response()->json([
             'id' => $user->id,
             'email' => $user->email,
-            'role' => $user->getRoleNames()->first(), // Only the first role (assuming single role)
-            'profile' => $user->profile,  // Profile information
-            'patient' => $user->patient,  // Patient-specific info (if exists)
-            'collaborator' => $user->collaborator,  // Collaborator-specific info (if exists)
+            'role' => $user->getRoleNames()->first(),
+            'profile' => $user->profile,
+            'patient' => $user->patient,
+            'collaborator' => $user->collaborator
         ]);
     }
 

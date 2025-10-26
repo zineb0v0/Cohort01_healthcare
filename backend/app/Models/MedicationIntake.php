@@ -9,29 +9,19 @@ use Illuminate\Support\Str;
 class MedicationIntake extends Model
 {
     use HasFactory;
-    protected $table = 'medication_intakes';
-
+    protected $table = 'medication_intakes'; // Forcer le nom de la table
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-        'id',
         'patient_id',
         'medication_id',
-        'intake_date',
-
         'scheduled_time',
         'taken_time',
-        'status',
-    ];
-    protected $casts = [
-        'scheduled_time' => 'array',
-        'taken_time' => 'array',
-        'intake_date' => 'date:Y-m-d',
-        'status' => 'array',
+        'status'
     ];
 
-    protected static function boot()
+      protected static function boot()
     {
         parent::boot();
 
@@ -44,7 +34,7 @@ class MedicationIntake extends Model
 
     public function patient()
     {
-        return $this->belongsTo(Patient::class, 'patient_id', 'id');
+        return $this->belongsTo(Patient::class);
     }
 
     public function medication()
