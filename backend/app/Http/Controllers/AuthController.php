@@ -22,7 +22,7 @@ class AuthController extends Controller
             'phone' => 'required|string|max:15',
             'address' => 'required|string|max:255',
             'date_birth' => 'required|date',
-            'gender' => 'required|string|in:homme,femme',
+            'gender' => 'required|string|in:male,female',
             'emergency_contact' => 'nullable|string|max:15',
             'role' => 'required|in:Patient,Collaborateur',
             'speciality' => 'required_if:role,Collaborateur|string|max:255',
@@ -54,7 +54,10 @@ class AuthController extends Controller
         $user->assignRole($role);
 
         if ($role === 'Patient') {
-            $user->patient()->create([]);
+            $user->patient()->create([
+                'id' => Str::uuid(),
+                'urgencyNumber' => 'URG-' . strtoupper(Str::random(8)),  // Add unique urgency number
+            ]);
         } elseif ($role === 'Collaborateur') {
             $user->collaborator()->create([
                 'speciality' => $request->speciality,

@@ -17,8 +17,8 @@ class Patient extends Model
 
     protected $fillable = [
         'id',
-
         'user_id',
+        'urgencyNumber'
     ];
 
     protected static function boot(): void

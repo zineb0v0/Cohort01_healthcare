@@ -28,7 +28,7 @@ const baseFields = {
     .refine((val) => !isNaN(Date.parse(val)), {
       message: "Veuillez entrer une date de naissance valide",
     }),
-  gender: z.enum(["homme", "femme"]),
+  gender: z.enum(["male", "female"]),
   emergency_contact: z
     .string()
     .nullable() // Allow null values

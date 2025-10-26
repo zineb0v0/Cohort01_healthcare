@@ -39,7 +39,7 @@ export default function RegisterForm() {
       password_confirmation: "",
       address: "",
       date_birth: "",
-      gender: "homme",
+      gender: "male",
       emergency_contact: "",
       speciality: "",
       license_number: "",
@@ -278,8 +278,8 @@ export default function RegisterForm() {
                       autoComplete="sex"
                       className="w-full px-4 py-2 border rounded-md"
                     >
-                      <option value="homme">Homme</option>
-                      <option value="femme">Femme</option>
+                      <option value="male">male</option>
+                      <option value="female">female</option>
                     </select>
                   </FormControl>
                   <FormMessage>{errors.gender?.message}</FormMessage>

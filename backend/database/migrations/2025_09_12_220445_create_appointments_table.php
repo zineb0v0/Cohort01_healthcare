@@ -17,9 +17,9 @@ return new class extends Migration {
             $table->dateTime('date');            // date et heure du rendez-vous
             $table->time('time')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'canceled','completed'])->default('pending');
-            
-            $table->boolean('is_telehealth')->default(false);
-            $table->string('telehealth_url')->nullable();
+
+            $table->boolean('isTelehealth')->default(false);
+            $table->string('telehealthLink')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

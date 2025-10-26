@@ -119,7 +119,7 @@ Route::middleware('auth:sanctum')->put('/profile', function () {
         'phone' => 'string|max:20',
         'address' => 'string|max:255',
         'date_birth' => 'date',
-        'gender' => 'in:homme,femme',
+        'gender' => 'in:male,female',
         'emergency_contact' => 'nullable|string|max:20',
     ]);
 

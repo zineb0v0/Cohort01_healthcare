@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '0612345678',
                 'address' => '123 Main Street, Casablanca',
                 'date_birth' => '1990-05-20',
-                'gender' => 'homme',
+                'gender' => 'male',
                 'emergency_contact' => '0654321987',
             ]
         );
@@ -81,7 +81,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '0623456789',
                 'address' => '456 Main Street, Casablanca',
                 'date_birth' => '1985-08-15',
-                'gender' => 'femme',
+                'gender' => 'female',
                 'emergency_contact' => '0659876543',
             ]
         );
