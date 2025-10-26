@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../zodeSchema";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
+import { Input } from "../../Components/ui/input";
+import { Button } from "../../Components/ui/button";
+import { CardContent } from "../../Components/ui/card";
 import { useNavigate } from "react-router-dom";
 import {
   Form,
@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/ui/form";
+} from "../../Components/ui/form";
 import api from "../../authentication/axios";
 import { toast } from "react-hot-toast";
 
@@ -137,18 +137,20 @@ export default function LoginForm() {
 
             {/* Remember Me + Forgot Password */}
             <div className="flex justify-between items-center w-[80%]">
-              <label className="flex items-center space-x-2 text-sm text-gray-700">
+              <label className="flex items-center space-x-2 text-xs sm:text-sm text-gray-700">
                 <input
                   type="checkbox"
                   checked={remember}
                   onChange={() => setRemember(!remember)}
                 />
-                <span className="text-[#00345d]">Se souvenir de moi</span>
+                <span className="text-[#00345d] text-xs sm:text-sm">
+                  Se souvenir de moi
+                </span>
               </label>
               <button
                 type="button"
                 onClick={() => navigate("/forgot-password")}
-                className="text-blue-600"
+                className="text-blue-600 text-xs sm:text-sm"
               >
                 Mot de passe oublié ?
               </button>

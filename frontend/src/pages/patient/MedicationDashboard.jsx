@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Clock, Plus } from 'lucide-react';
 import TodaysMedicationsCard from '../../components/PatientComponents/Medications/TodaysMedicationsCard';
 import MedicationList from '../../components/PatientComponents/Medications/MedicationList';
-import AddMedicationModal from '../../components/PatientComponents/Medications/AddMedicationModal';
+import AddMedicationModal from '../../Components/PatientComponents/Medications/AddMedicationModal';
 
 export default function MedicationDashboard() {
   const [activeTab, setActiveTab] = useState('analyses');
@@ -28,30 +28,55 @@ export default function MedicationDashboard() {
     }
   };
 
-  const fetchTodayIntakes = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost:8000/api/patient/today-intakes', {
-        headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' }
-      });
-      const intakes = await response.json();
+const fetchTodayIntakes = async () => {
+  try {
+    setLoading(true);
 
-      const formattedIntakes = intakes.intakes.map(intake => ({
-        id: intake.intake_id,
-        medication_name: intake.medication_name,
-        dosage: intake.dosage,
-        unit: intake.unit,
-        scheduled_time: intake.scheduled_time,
-        status: intake.status
-      }));
+    const response = await fetch('http://localhost:8000/api/patient/today-intakes', {
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-      setTodayIntakes(formattedIntakes);
+    // If server returned an error (404, 401, etc.)
+    if (!response.ok) {
+      const text = await response.text(); // could be HTML
+      console.error('Server returned an error:', response.status, text);
+      setTodayIntakes([]); // clear previous intakes
       setLoading(false);
-    } catch (error) {
-      console.error('Erreur:', error);
-      setLoading(false);
+      return;
     }
-  };
+
+    const intakes = await response.json();
+
+    if (!intakes || !intakes.intakes) {
+      console.warn('No intakes data returned', intakes);
+      setTodayIntakes([]);
+      setLoading(false);
+      return;
+    }
+
+    const formattedIntakes = intakes.intakes.map((intake) => ({
+      id: intake.intake_id,
+      medication_name: intake.medication_name,
+      dosage: intake.dosage,
+      unit: intake.unit,
+      scheduled_time: intake.scheduled_time,
+      status: intake.status,
+    }));
+
+    setTodayIntakes(formattedIntakes);
+    setLoading(false);
+
+  } catch (error) {
+    console.error('Fetch error:', error);
+    setTodayIntakes([]);
+    setLoading(false);
+  }
+};
+  
+
 
   useEffect(() => {
     fetchMedications();

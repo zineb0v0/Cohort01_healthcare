@@ -1,27 +1,26 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../../authentication/axios";
 import { toast } from "react-hot-toast";
-import { Button } from "../../Components/ui/button"
+import { Button } from "../../Components/ui/button";
 
 const ResetPasswordForm = () => {
   const { search } = useLocation();
   const urlParams = new URLSearchParams(search);
   const token = urlParams.get("token");
   const email = urlParams.get("email");
-  console.log(token); // 'abc123' (if token=abc123 in the URL)
-  console.log(email); // 'user@example.com' (if email=user@example.com in the URL)
+
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(""); // General error message
-  const [errors, setErrors] = useState([]); // Specific form validation errors
+  const [errors, setErrors] = useState({});
+  const [error, setError] = useState("");
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(""); // Reset error state before starting the request
-    setErrors([]); // Reset validation errors
+    setErrors({});
+    setError("");
 
     try {
       const response = await api.post("/api/reset-password", {
@@ -31,75 +30,68 @@ const ResetPasswordForm = () => {
         password_confirmation: passwordConfirmation,
       });
 
-      toast.success(response.data.message);
-      setPassword(""); // Clear password field on success
-      setPasswordConfirmation(""); // Clear password confirmation field on success
-    } catch (error) {
-      if (error.response?.status === 422) {
-        setErrors(error.response.data.errors); // Set form validation errors
+      toast.success(response.data.message || "Mot de passe réinitialisé !");
+      setPassword("");
+      setPasswordConfirmation("");
+    } catch (err) {
+      if (err.response?.status === 422) {
+        setErrors(err.response.data.errors || {});
+      } else {
+        setError(err.response?.data?.message || "Une erreur est survenue !");
       }
-      setError(
-        error.response?.data?.message ||
-          "Échec de la réinitialisation du mot de passe."
-      );
-      toast.error(
-        error.response?.data?.message ||
-          "Échec de la réinitialisation du mot de passe."
-      );
     } finally {
-      setLoading(false); // Stop loading spinner
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-sm mx-auto p-4">
-      <h1 className="text-2xl font-bold text-center mb-4">
+    <div className="w-full max-w-xl my-15  mx-auto p-6 sm:p-10 flex flex-col items-center justify-center">
+      <h1 className="text-4xl font-bold text-center mb-8">
         Réinitialiser votre mot de passe
       </h1>
-      <p className="text-center mb-6 text-gray-600">
-        Veuillez entrer votre nouveau mot de passe ci-dessous.
+      <p className="text-center text-base sm:text-lg mb-6 text-gray-600">
+        Veuillez entrer votre nouveau mot de passe ci-dessous :
       </p>
 
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Entrez un nouveau mot de passe"
-        className="w-full p-3 border border-gray-300 rounded-md mb-4"
-      />
+      <form className="w-full flex flex-col gap-4" onSubmit={handleResetPassword}>
+        {/* Password field */}
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Entrez un nouveau mot de passe"
+          className="w-full p-4 text-base sm:text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {errors.password && (
+          <p className="text-red-500 text-sm sm:text-base">{errors.password[0]}</p>
+        )}
 
-      <input
-        type="password"
-        value={passwordConfirmation}
-        onChange={(e) => setPasswordConfirmation(e.target.value)}
-        placeholder="Confirmer le nouveau mot de passe"
-        className="w-full p-3 border border-gray-300 rounded-md mb-4"
-      />
+        {/* Password confirmation field */}
+        <input
+          type="password"
+          value={passwordConfirmation}
+          onChange={(e) => setPasswordConfirmation(e.target.value)}
+          placeholder="Confirmer le nouveau mot de passe"
+          className="w-full p-4 text-base sm:text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {errors.password_confirmation && (
+          <p className="text-red-500 text-sm sm:text-base">{errors.password_confirmation[0]}</p>
+        )}
 
-      {errors.password && (
-        <p className="text-red-500 text-sm text-center mb-4">
-          {errors.password[0]}
-        </p>
-      )}
-      {errors.password_confirmation && (
-        <p className="text-red-500 text-sm text-center mb-4">
-          {errors.password_confirmation[0]}
-        </p>
-      )}
+        {/* General error */}
+        {error && (
+          <p className="text-red-500 text-sm sm:text-base text-center">{error}</p>
+        )}
 
-      {error && (
-        <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-      )}
-
-      <Button
-        onClick={handleResetPassword}
-        disabled={loading}
-        className="w-full p-5"
-      >
-        {loading
-          ? "Réinitialisation en cours..."
-          : "Réinitialiser le mot de passe"}
-      </Button>
+        {/* Submit button */}
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full py-4 sm:py-5 bg-foreground/90 text-base sm:text-lg text-white font-semibold mt-4"
+        >
+          {loading ? "Réinitialisation en cours..." : "Réinitialiser le mot de passe"}
+        </Button>
+      </form>
     </div>
   );
 };

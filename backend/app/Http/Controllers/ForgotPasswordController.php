@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Password;
 
 class ForgotPasswordController extends Controller
 {
-    
+
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate([

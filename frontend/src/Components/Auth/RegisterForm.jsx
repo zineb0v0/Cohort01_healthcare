@@ -5,10 +5,10 @@ import {
   patientRegisterSchema,
   collaboratorRegisterSchema,
 } from "../zodeSchema";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "../../Components/ui/input";
+import { Button } from "../../Components/ui/button";
+import { CardContent } from "../../Components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "../../Components/ui/tabs";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Form,
@@ -17,7 +17,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/ui/form";
+} from "../../Components/ui/form";
 import api from "../../authentication/axios";
 import { toast } from "react-hot-toast";
 
@@ -39,7 +39,7 @@ export default function RegisterForm() {
       password_confirmation: "",
       address: "",
       date_birth: "",
-      gender: "male",
+      gender: "homme",
       emergency_contact: "",
       speciality: "",
       license_number: "",
@@ -72,7 +72,7 @@ export default function RegisterForm() {
         ...data,
         role: tabValue, // Get the selected role
       };
-      console.log(formData)
+      console.log(formData);
       // Send registration request
       const response = await api.post(
         "http://127.0.0.1:8000/api/register",
@@ -121,13 +121,17 @@ export default function RegisterForm() {
         >
           Créez votre compte
         </h1>
-
-        <Tabs value={tabValue} onValueChange={setTabValue} className="mb-8">
+        <Tabs
+          value={tabValue}
+          onValueChange={setTabValue}
+          className="mb-4 sm:mb-8"
+        >
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="Patient" className="flex items-center gap-2">
-              <img src="userIcon.png" className="w-5 h-5" alt="patient icon" />{" "}
+              <img src="userIcon.png" className="w-5 h-5" alt="patient icon" />
               Patient
             </TabsTrigger>
+
             <TabsTrigger
               value="Collaborateur"
               className="flex items-center gap-2"
@@ -136,8 +140,10 @@ export default function RegisterForm() {
                 src="providerimg2.png"
                 className="w-6 h-6"
                 alt="Professionnel de santé"
-              />{" "}
-              Professionnel de santé
+              />
+              {/* Show full text on large screens, short on medium */}
+              <span className="hidden md:inline">Professionnel de santé</span>
+              <span className="inline md:hidden">Préstataire</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -278,8 +284,8 @@ export default function RegisterForm() {
                       autoComplete="sex"
                       className="w-full px-4 py-2 border rounded-md"
                     >
-                      <option value="male">male</option>
-                      <option value="female">female</option>
+                      <option value="homme">Homme</option>
+                      <option value="femme">Femme</option>
                     </select>
                   </FormControl>
                   <FormMessage>{errors.gender?.message}</FormMessage>
@@ -300,7 +306,9 @@ export default function RegisterForm() {
                       {...field}
                       placeholder="Numéro d'urgence"
                       autoComplete="tel"
-                      className={errors.emergency_contact ? "border-red-500" : ""}
+                      className={
+                        errors.emergency_contact ? "border-red-500" : ""
+                      }
                     />
                   </FormControl>
                   <FormMessage>{errors.emergency_contact?.message}</FormMessage>

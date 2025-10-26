@@ -14,11 +14,16 @@ class MedicationIntake extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'id',
         'patient_id',
         'medication_id',
         'scheduled_time',
         'taken_time',
         'status'
+    ];
+     protected $casts = [
+        'scheduled_time' => 'datetime',
+        'taken_time' => 'datetime',
     ];
 
       protected static function boot()

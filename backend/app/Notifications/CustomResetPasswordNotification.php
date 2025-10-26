@@ -26,15 +26,18 @@ class CustomResetPasswordNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
+        // Build the frontend URL
+        $frontendUrl = config('app.frontend_url')
+            .'/reset-password?token='
+            .$this->token
+            .'&email='
+            .urlencode($this->email);
+
         return (new MailMessage())
-                    ->subject('Password Reset Request')
-                    ->line('You are receiving this email because we received a password reset request for your account.')
-                    // Pass both token and email as query parameters in the URL
-                    ->action(
-                        'Reset Password',
-                        url(route('password.reset', ['token' => $this->token, 'email' => $this->email]), false)  // Include email in URL
-                    )
-                    ->line('If you did not request a password reset, no further action is required.');
+            ->subject('Password Reset Request')
+            ->line('You are receiving this email because we received a password reset request for your account.')
+            ->action('Reset Password', $frontendUrl)
+            ->line('If you did not request a password reset, no further action is required.');
     }
 
     public function toArray(object $notifiable): array

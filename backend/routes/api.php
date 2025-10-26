@@ -1,18 +1,18 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CollaboratorController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\MedicationController;
+use App\Http\Controllers\MedicationIntakeController;
+use App\Http\Controllers\NewsletterEmailController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AnalysisController;
-use App\Http\Controllers\MedicationController;
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\CollaboratorController;
-use App\Http\Controllers\ForgotPasswordController;
-use App\Http\Controllers\NewsletterEmailController;
-use App\Http\Controllers\MedicationIntakeController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -95,14 +95,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/appointments', [AppointmentController::class, 'createAppointment']);
     });
     // Patient Routes
-    Route::middleware('role:Patient')->prefix( 'patient')->group(function () {
+    Route::middleware('role:Patient')->prefix('patient')->group(function () {
         Route::get('/dashboard', [PatientController::class, 'dashboard']);
         Route::get('/account-activity', [ProfileController::class, 'accountActivity']);
         Route::get('/appointments', [PatientController::class, 'listAppointments']);
 
         // Medications
         Route::apiResource('/medications', MedicationController::class);
-
+        Route::get('/today-intakes', [MedicationIntakeController::class, 'todayIntakes']);
         // Medication Intakes
         Route::get('/medication-intakes/percentages', [MedicationIntakeController::class, 'percentages']);
         Route::put('/medication-intakes/{id}/status', [MedicationIntakeController::class, 'updateStatus']);

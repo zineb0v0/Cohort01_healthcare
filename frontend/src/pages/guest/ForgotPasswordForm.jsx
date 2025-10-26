@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../../authentication/axios";
 import { toast } from "react-hot-toast";
-import { Button } from "../../Components/ui/button"
+import { Button } from "../../Components/ui/button";
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
@@ -40,13 +40,13 @@ const ForgotPasswordForm = () => {
   };
 
   return (
-    <div className="w-lg sm:max-w-lg p-4 mx-auto pt-30 flex flex-col items-center justify-center">
+    <div className="w-lg max-w-md sm:max-w-lg  p-4 mx-auto pt-30 flex flex-col items-center justify-center">
       <h1 className="text-4xl font-bold text-center mb-10">
         Mot de passe oublié ?
       </h1>
       <p className="text-center text-medium text-lg mb-6 text-gray-600">
         Entrez votre email pour recevoir un lien de réinitialisation de mot de
-        passe.
+        passe :
       </p>
 
       {/* Email input */}
@@ -68,8 +68,8 @@ const ForgotPasswordForm = () => {
       {/* Submit button */}
       <Button
         onClick={handleForgotPassword}
-        disabled={loading || !email} // Disabled if loading or email is empty
-        className="w-[61%] py-6 px-8 bg-foreground/90 text-lg text-white"
+        disabled={loading || !email}
+        className="w-[95%] py-6 bg-foreground/90 text-lg text-white"
       >
         {loading ? "Envoi en cours..." : "Envoyer le lien de réinitialisation"}
       </Button>

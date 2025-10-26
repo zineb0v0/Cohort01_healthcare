@@ -26,6 +26,7 @@ class Medication extends Model
     }
 
     protected $fillable = [
+        'id',
         'patient_id',
         'medication_name',
         'dosage',

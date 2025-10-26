@@ -1,5 +1,4 @@
-// DynamicMedicationsChart.jsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -17,21 +16,6 @@ export default function DynamicMedicationsChart({ period }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getCurrentWeekRange = () => {
-    const today = new Date();
-    const day = today.getDay();
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() + diffToMonday);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    endOfWeek.setHours(23, 59, 59, 999);
-
-    return { startOfWeek, endOfWeek };
-  };
-
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -39,47 +23,61 @@ export default function DynamicMedicationsChart({ period }) {
     api
       .get("/api/patient/medication-intakes/percentages")
       .then((res) => {
+        console.log("API Response:", res.data);
+        
         let rawData = res.data[period] || [];
         if (!Array.isArray(rawData)) rawData = Object.values(rawData);
 
-        if (period === "daily") {
-          const { startOfWeek, endOfWeek } = getCurrentWeekRange();
-          rawData = rawData.filter((item) => {
-            const date = new Date(item.date);
-            return date >= startOfWeek && date <= endOfWeek;
-          });
-        }
+        console.log(`Raw ${period} data:`, rawData);
 
+        // Don't filter daily data - show ALL dates
         const grouped = {};
+        
         rawData.forEach((item) => {
           let key;
           let sortDate;
 
           if (period === "daily") {
-            const dateObj = new Date(item.date);
+            // Format: 2025-10-26
+            const dateObj = new Date(item.date + "T00:00:00");
             sortDate = dateObj.getTime();
+            
+            // Format date nicely: "lun. 26 oct"
             key = dateObj.toLocaleDateString("fr-FR", {
               weekday: "short",
               day: "numeric",
               month: "short",
             });
           } else if (period === "weekly") {
-            const [startStr, endStr] = item.week.split(" - ");
-            const startDate = new Date(startStr + " 00:00:00");
-            const endDate = new Date(endStr + " 00:00:00");
-            sortDate = startDate.getTime();
-            key = `${startDate.toLocaleDateString("fr-FR", {
-              weekday: "short",
-              day: "numeric",
-              month: "short",
-            })} - ${endDate.toLocaleDateString("fr-FR", {
-              weekday: "short",
-              day: "numeric",
-              month: "short",
-            })}`;
+            // Backend sends: "20 Oct - 26 Oct"
+            key = item.week;
+            
+            // Parse for sorting
+            const currentYear = new Date().getFullYear();
+            const startPart = item.week.split(" - ")[0]; // "20 Oct"
+            const match = startPart.match(/(\d+)\s+(\w+)/);
+            
+            if (match) {
+              const day = parseInt(match[1]);
+              const monthStr = match[2].toLowerCase();
+              const months = {
+                'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+                'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
+                'jan': 0, 'fév': 1, 'mar': 2, 'avr': 3, 'mai': 4, 'juin': 5,
+                'juil': 6, 'aoû': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'déc': 11
+              };
+              const month = months[monthStr] || 9; // default to Oct
+              const dateObj = new Date(currentYear, month, day);
+              sortDate = dateObj.getTime();
+            } else {
+              sortDate = Date.now();
+            }
           } else if (period === "monthly") {
-            const dateObj = new Date(item.month + "-01");
+            // Format: "2025-10"
+            const dateObj = new Date(item.month + "-01T00:00:00");
             sortDate = dateObj.getTime();
+            
+            // Format: "oct. 2025"
             key = dateObj.toLocaleDateString("fr-FR", {
               month: "short",
               year: "numeric",
@@ -88,14 +86,23 @@ export default function DynamicMedicationsChart({ period }) {
 
           if (!key) return;
 
-          if (!grouped[key]) grouped[key] = { date: key, __sortDate: sortDate };
+          if (!grouped[key]) {
+            grouped[key] = { 
+              date: key, 
+              __sortDate: sortDate,
+              __rawDate: period === 'daily' ? item.date : null
+            };
+          }
+          
           grouped[key][item.medication_name] = item.percentage;
         });
 
+        // Sort by date
         const groupedArray = Object.values(grouped).sort(
           (a, b) => a.__sortDate - b.__sortDate
         );
 
+        console.log("Final chart data:", groupedArray);
         setData(groupedArray);
       })
       .catch((err) => {
@@ -108,18 +115,23 @@ export default function DynamicMedicationsChart({ period }) {
   const medicationNames = Array.from(
     new Set(
       data.flatMap((d) =>
-        Object.keys(d).filter((key) => key !== "date" && key !== "__sortDate")
+        Object.keys(d).filter((key) => 
+          key !== "date" && 
+          key !== "__sortDate" && 
+          key !== "__rawDate"
+        )
       )
     )
   );
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload || !payload.length) return null;
+    
     return (
-      <div className="bg-white p-3 shadow border rounded">
-        <p className="font-bold mb-1">{label}</p>
-        {payload.map((p) => (
-          <p key={p.name} className="font-semibold">
+      <div className="bg-white p-3 shadow-lg border rounded-lg">
+        <p className="font-bold mb-2 text-gray-900">{label}</p>
+        {payload.map((p, index) => (
+          <p key={index} style={{ color: p.color }} className="font-semibold">
             {p.name}: {p.value}%
           </p>
         ))}
@@ -130,43 +142,79 @@ export default function DynamicMedicationsChart({ period }) {
   if (loading)
     return (
       <div className="flex items-center justify-center h-80 text-gray-500">
-        Chargement des données...
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Chargement des données...</p>
+        </div>
       </div>
     );
 
   if (error)
     return (
       <div className="flex items-center justify-center h-80 text-red-500">
-        {error}
+        <div className="text-center">
+          <p className="text-xl mb-2">⚠️</p>
+          <p>{error}</p>
+        </div>
       </div>
     );
 
   if (!data.length)
     return (
       <div className="flex items-center justify-center h-80 text-gray-500">
-        Aucune donnée disponible pour cette période.
+        <div className="text-center">
+          <p className="text-xl mb-2">📊</p>
+          <p>Aucune donnée disponible pour cette période.</p>
+        </div>
       </div>
     );
 
+  const colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6"];
+
   return (
-    <div className="w-full min-h-[300px] min-w-[300px]">
-      <ResponsiveContainer width="100%" height="100%" minHeight={300}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+    <div className="w-full" style={{ height: '400px' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart 
+          data={data} 
+          margin={{ 
+            top: 5, 
+            right: 30, 
+            left: 20, 
+            bottom: 5 
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          
+          <XAxis 
+            dataKey="date" 
+            tick={{ fontSize: 12 }}
+            angle={period === 'weekly' ? -45 : 0}
+            textAnchor={period === 'weekly' ? 'end' : 'middle'}
+            height={period === 'weekly' ? 80 : 60}
+          />
+          
+          <YAxis 
+            domain={[0, 100]} 
+            tickFormatter={(v) => `${v}%`}
+            tick={{ fontSize: 12 }}
+          />
+          
           <Tooltip content={CustomTooltip} />
-          <Legend />
+          
+          <Legend wrapperStyle={{ paddingTop: '20px' }} />
+          
           {medicationNames.map((name, index) => (
             <Line
               key={name}
               type="monotone"
               dataKey={name}
+              name={name}
               strokeWidth={2}
-              stroke={["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"][
-                index % 5
-              ]}
-              dot={{ r: 3 }}
+              stroke={colors[index % colors.length]}
+              dot={{ 
+                r: 4, 
+                fill: colors[index % colors.length]
+              }}
               activeDot={{ r: 6 }}
             />
           ))}

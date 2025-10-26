@@ -1,12 +1,17 @@
 import { Phone, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 export default function About() {
   const fadeInUp = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0 },
   };
+  const navigate = useNavigate(); // add this
 
+  const handleContactClick = () => {
+    navigate("/contact"); // path to your contact page
+  };
   return (
     <motion.section
       id="about"
@@ -42,7 +47,10 @@ export default function About() {
         variants={fadeInUp}
         transition={{ duration: 0.8, delay: 0.4 }}
       >
-        <button className="bg-[#001f42]/94 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:scale-103  hover:bg-[#001f42] transition">
+        <button
+          className="bg-[#001f42]/94 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:scale-103  hover:bg-[#001f42] transition"
+          onClick={handleContactClick}
+        >
           Contactez-nous <ArrowRight className="w-4 h-4" />
         </button>
 
