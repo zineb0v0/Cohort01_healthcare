@@ -22,7 +22,7 @@ class AuthController extends Controller
             'phone' => 'required|string|max:15',
             'address' => 'required|string|max:255',
             'date_birth' => 'required|date',
-            'gender' => 'required|string|in:male,female',
+            'gender' => 'required|string|in:homme,femme',
             'emergency_contact' => 'nullable|string|max:15',
             'role' => 'required|in:Patient,Collaborateur',
             'speciality' => 'required_if:role,Collaborateur|string|max:255',
@@ -54,10 +54,7 @@ class AuthController extends Controller
         $user->assignRole($role);
 
         if ($role === 'Patient') {
-            $user->patient()->create([
-                'id' => Str::uuid(),
-                'urgencyNumber' => 'URG-' . strtoupper(Str::random(8)),  // Add unique urgency number
-            ]);
+            $user->patient()->create([]);
         } elseif ($role === 'Collaborateur') {
             $user->collaborator()->create([
                 'speciality' => $request->speciality,
@@ -139,15 +136,16 @@ class AuthController extends Controller
     // In AuthController
     public function me(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user(); // Get the authenticated user
 
+        // Return basic user data along with the profile and role
         return response()->json([
             'id' => $user->id,
             'email' => $user->email,
-            'role' => $user->getRoleNames()->first(),
-            'profile' => $user->profile,
-            'patient' => $user->patient,
-            'collaborator' => $user->collaborator
+            'role' => $user->getRoleNames()->first(), // Only the first role (assuming single role)
+            'profile' => $user->profile,  // Profile information
+            'patient' => $user->patient,  // Patient-specific info (if exists)
+            'collaborator' => $user->collaborator,  // Collaborator-specific info (if exists)
         ]);
     }
 

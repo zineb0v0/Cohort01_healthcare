@@ -19,7 +19,7 @@ class PatientFactory extends Factory
         return [
             'id' => $this->faker->uuid(),
             'user_id' => \App\Models\User::factory(),
-            'urgencyNumber' => $this->faker->optional()->numerify('URG-####'),
+            // 'urgencyNumber' => $this->faker->optional()->numerify('URG-####'),
         ];
     }
 }

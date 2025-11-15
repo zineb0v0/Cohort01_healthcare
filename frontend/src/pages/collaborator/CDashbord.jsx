@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../lib/axios";
 
 export default function Dashboard() {
@@ -8,20 +8,21 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("token");
 
         // Fetch all in parallel
-        const [appointmentsRes, patientsRes, collaboratorRes] = await Promise.all([
-          api.get("/api/collaborator/appointments", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          api.get("/api/collaborator/patients", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          api.get("/api/collaborator/profile", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+        const [appointmentsRes, patientsRes, collaboratorRes] =
+          await Promise.all([
+            api.get("/api/collaborator/appointments", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            api.get("/api/collaborator/patients", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            api.get("/api/collaborator/profile", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
 
         const appointments = appointmentsRes.data;
         const patients = patientsRes.data;
@@ -37,7 +38,7 @@ export default function Dashboard() {
           { confirmed: 0, canceled: 0 }
         );
 
-        const doctorName = collaborator.user?.profile
+        const doctorName = collaborator?.user?.profile
           ? `${collaborator.user.profile.first_name} ${collaborator.user.profile.last_name}`
           : "";
 
@@ -61,7 +62,10 @@ export default function Dashboard() {
   if (loading || !stats) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500 text-lg">         ⏳ Chargement du tableau de bord...</p>
+        <p className="text-gray-500 text-lg">
+          {" "}
+          ⏳ Chargement du tableau de bord...
+        </p>
       </div>
     );
   }
@@ -76,31 +80,41 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white p-6 rounded-2xl shadow hover:shadow-md transition">
             <h3 className="text-gray-500 text-sm">Total des rendez-vous</h3>
-            <p className="text-3xl font-bold text-blue-600">{stats.appointmentsCount}</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {stats.appointmentsCount}
+            </p>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow hover:shadow-md transition">
             <h3 className="text-gray-500 text-sm">Patients suivis</h3>
-            <p className="text-3xl font-bold text-green-600">{stats.patientsCount}</p>
+            <p className="text-3xl font-bold text-green-600">
+              {stats.patientsCount}
+            </p>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow hover:shadow-md transition">
             <h3 className="text-gray-500 text-sm">Rendez-vous confirmés</h3>
-            <p className="text-3xl font-bold text-teal-600">{stats.confirmedAppointments}</p>
+            <p className="text-3xl font-bold text-teal-600">
+              {stats.confirmedAppointments}
+            </p>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow hover:shadow-md transition">
             <h3 className="text-gray-500 text-sm">Rendez-vous annulés</h3>
-            <p className="text-3xl font-bold text-red-500">{stats.canceledAppointments}</p>
+            <p className="text-3xl font-bold text-red-500">
+              {stats.canceledAppointments}
+            </p>
           </div>
         </div>
 
         <div className="mt-10 bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Résumé rapide</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Résumé rapide
+          </h2>
           <p className="text-gray-600">
-            Vous avez actuellement <strong>{stats.appointmentsCount}</strong> rendez-vous,
-            dont <strong>{stats.confirmedAppointments}</strong> confirmés et{" "}
-            <strong>{stats.canceledAppointments}</strong> annulés.
+            Vous avez actuellement <strong>{stats.appointmentsCount}</strong>{" "}
+            rendez-vous, dont <strong>{stats.confirmedAppointments}</strong>{" "}
+            confirmés et <strong>{stats.canceledAppointments}</strong> annulés.
           </p>
         </div>
       </div>

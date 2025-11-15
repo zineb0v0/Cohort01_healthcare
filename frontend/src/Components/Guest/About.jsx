@@ -7,10 +7,10 @@ export default function About() {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0 },
   };
-  const navigate = useNavigate(); // add this
+  const navigate = useNavigate();
 
   const handleContactClick = () => {
-    navigate("/contact"); // path to your contact page
+    navigate("/contact"); 
   };
   return (
     <motion.section

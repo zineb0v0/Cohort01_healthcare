@@ -43,7 +43,7 @@ export default function AuthenticationPage() {
               isRegister ? "active" : ""
             } flex flex-col items-center justify-center relative`}
           >
-            <h1 className="text-3xl md:text-4xl m-4 font-bold  ">
+            <h1 className="text-3xl md:text-4xl m-4 font-bold ">
               Bienvenue dans votre parcours de santé !
             </h1>
             <p className="text-lg md:text-xl">

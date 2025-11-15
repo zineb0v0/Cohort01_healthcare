@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +20,7 @@ class MedicationAnalysis extends Model
         'period_end',
         'total_intakes',
         'taken_intakes',
-        'adherence_rate'
+        'adherence_rate',
     ];
 
     protected static function boot()

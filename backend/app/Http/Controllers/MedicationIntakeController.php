@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\MedicationIntake;
 use App\Models\Patient;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class MedicationIntakeController extends Controller
 {
+    // -----------------------------
+    // 1️⃣ Update intake status
+    // -----------------------------
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -30,107 +33,58 @@ class MedicationIntakeController extends Controller
         ]);
     }
 
-    public function todayIntakes(Request $request)
-    {
-        $user = $request->user();
-        $patientId = $user->patient->id; // grâce à la relation hasOne dans User
-        $today = \Carbon\Carbon::today();
+public function percentages(Request $request)
+{
+    $user = $request->user();
 
-        $intakes = MedicationIntake::where('patient_id', $patientId)
-        ->whereDate('scheduled_time', $today)
-        ->with('medication:id,medication_name,dosage,unit')
-        ->orderBy('scheduled_time', 'asc')
-        ->get();
-
-        return response()->json([
-            'message' => 'Intakes du jour pour le patient connecté',
-            'patient_id' => $patientId,
-            'count' => $intakes->count(),
-            'intakes' => $intakes->map(function ($intake) {
-                return [
-                    'intake_id' => $intake->id,
-                    'scheduled_time' => $intake->scheduled_time,
-                    'status' => $intake->status,
-                    'medication_name' => $intake->medication->medication_name ?? 'Médicament inconnu',
-                    'dosage' => $intake->medication->dosage ?? '',
-                    'unit' => $intake->medication->unit ?? '',
-                ];
-            }),
-        ]);
+    $patient = Patient::where('user_id', $user->id)->first();
+    if (!$patient) {
+        return response()->json(['message' => 'Patient introuvable'], 404);
     }
 
-    public function percentages(Request $request)
-    {
-        $user = $request->user();
+    $intakes = MedicationIntake::where('patient_id', $patient->id)->get();
 
-        // Récupérer le patient lié à cet utilisateur
-        $patient = Patient::where('user_id', $user->id)->first();
+    $daily = [];
+    $weeklyAgg = [];
+    $monthlyAgg = [];
 
-        if (!$patient) {
-            return response()->json(['message' => 'Patient introuvable'], 404);
-        }
+    foreach ($intakes as $intake) {
+        $takenTime = $intake->taken_time ? (is_string($intake->taken_time) ? json_decode($intake->taken_time, true) : $intake->taken_time) : [];
+        $scheduledTime = $intake->scheduled_time ? (is_string($intake->scheduled_time) ? json_decode($intake->scheduled_time, true) : $intake->scheduled_time) : [];
 
-        // Récupérer les prises de médicaments du patient
-        $intakes = MedicationIntake::with('medication')
-            ->where('patient_id', $patient->id)
-            ->orderBy('scheduled_time')
-            ->get();
+        $medName = $intake->medication->medication_name ?? 'Unknown';
 
-        $daily = [];
-        $weeklyAgg = [];
-        $monthlyAgg = [];
+        foreach ($scheduledTime as $index => $scheduled) {
+            $dateObj = Carbon::parse($scheduled);
 
-        // Group intakes by date and medication
-        $groupedByDateAndMed = $intakes->groupBy(function ($intake) {
-            return $intake->scheduled_time->format('Y-m-d').'|'.$intake->medication_id;
-        });
+            $taken = isset($takenTime[$index]) && $takenTime[$index] !== null ? 1 : 0;
+            $percentage = 100 * $taken; // Each scheduled time counts as 100% if taken, 0% if not
 
-        foreach ($groupedByDateAndMed as $key => $dayIntakes) {
-            list($date, $medicationId) = explode('|', $key);
-
-            $total = $dayIntakes->count();
-            $taken = $dayIntakes->where('status', 'taken')->count();
-            $percentage = $total > 0 ? round(($taken / $total) * 100, 0) : 0;
-
-            $medName = $dayIntakes->first()->medication->medication_name ?? 'Unknown';
-            $dateObj = Carbon::parse($date);
-
-            // -----------------------------
-            // Daily chart: simple YYYY-MM-DD
-            // -----------------------------
+            // Daily
             $daily[] = [
                 'date' => $dateObj->format('Y-m-d'),
                 'medication_name' => $medName,
                 'percentage' => $percentage,
-                'taken' => $taken,
-                'total' => $total,
             ];
 
-            // -----------------------------
-            // Weekly aggregation with date range
-            // -----------------------------
-            $startOfWeek = $dateObj->copy()->startOfWeek(); // Monday
-            $endOfWeek = $dateObj->copy()->endOfWeek();     // Sunday
-
-            // Format week label like: "13 oct. - 19 oct."
+            // Weekly aggregation
+            $startOfWeek = $dateObj->copy()->startOfWeek();
+            $endOfWeek = $dateObj->copy()->endOfWeek();
             $weekLabel = $startOfWeek->format('j M').' - '.$endOfWeek->format('j M');
-
-            // Use start date as internal key for sorting
             $weeklyKey = $startOfWeek->format('Y-m-d').'-'.$medName;
+
             if (!isset($weeklyAgg[$weeklyKey])) {
                 $weeklyAgg[$weeklyKey] = [
                     'week' => $weekLabel,
-                    'week_start' => $startOfWeek->format('Y-m-d'), // for sorting
+                    'week_start' => $startOfWeek->format('Y-m-d'),
                     'medication_name' => $medName,
                     'percentages' => [],
                 ];
             }
             $weeklyAgg[$weeklyKey]['percentages'][] = $percentage;
 
-            // -----------------------------
             // Monthly aggregation
-            // -----------------------------
-            $month = $dateObj->format('Y-m');  // e.g., 2025-10
+            $month = $dateObj->format('Y-m');
             $monthlyKey = $month.'-'.$medName;
             if (!isset($monthlyAgg[$monthlyKey])) {
                 $monthlyAgg[$monthlyKey] = [
@@ -141,44 +95,36 @@ class MedicationIntakeController extends Controller
             }
             $monthlyAgg[$monthlyKey]['percentages'][] = $percentage;
         }
-
-        // -----------------------------
-        // Aggregate weekly percentages
-        // -----------------------------
-        $weekly = array_map(fn ($item) => [
-            'week' => $item['week'],
-            'medication_name' => $item['medication_name'],
-            'percentage' => count($item['percentages']) > 0
-                ? round(array_sum($item['percentages']) / count($item['percentages']), 0)
-                : 0,
-            'week_start' => $item['week_start'], // keep start date for sorting
-        ], $weeklyAgg);
-
-        // Sort by week_start
-        usort($weekly, fn ($a, $b) => strtotime($a['week_start']) <=> strtotime($b['week_start']));
-
-        // Remove week_start from output
-        $weekly = array_map(fn ($item) => [
-            'week' => $item['week'],
-            'medication_name' => $item['medication_name'],
-            'percentage' => $item['percentage'],
-        ], $weekly);
-
-        // -----------------------------
-        // Aggregate monthly percentages
-        // -----------------------------
-        $monthly = array_map(fn ($item) => [
-            'month' => $item['month'],
-            'medication_name' => $item['medication_name'],
-            'percentage' => count($item['percentages']) > 0
-                ? round(array_sum($item['percentages']) / count($item['percentages']), 0)
-                : 0,
-        ], $monthlyAgg);
-
-        return response()->json([
-            'daily' => array_values($daily),
-            'weekly' => array_values($weekly),
-            'monthly' => array_values($monthly),
-        ]);
     }
+
+    // Aggregate weekly
+    $weekly = array_map(fn($item) => [
+        'week' => $item['week'],
+        'medication_name' => $item['medication_name'],
+        'percentage' => round(array_sum($item['percentages']) / count($item['percentages']), 0),
+        'week_start' => $item['week_start'],
+    ], $weeklyAgg);
+
+    usort($weekly, fn($a, $b) => strtotime($a['week_start']) <=> strtotime($b['week_start']));
+
+    $weekly = array_map(fn($item) => [
+        'week' => $item['week'],
+        'medication_name' => $item['medication_name'],
+        'percentage' => $item['percentage'],
+    ], $weekly);
+
+    // Aggregate monthly
+    $monthly = array_map(fn($item) => [
+        'month' => $item['month'],
+        'medication_name' => $item['medication_name'],
+        'percentage' => round(array_sum($item['percentages']) / count($item['percentages']), 0),
+    ], $monthlyAgg);
+
+    return response()->json([
+        'daily' => $daily,
+        'weekly' => $weekly,
+        'monthly' => $monthly,
+    ]);
+}
+
 }

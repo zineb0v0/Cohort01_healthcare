@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import api from '../../lib/axios';
 import { Clock, Plus } from 'lucide-react';
 import TodaysMedicationsCard from '../../components/PatientComponents/Medications/TodaysMedicationsCard';
 import MedicationList from '../../components/PatientComponents/Medications/MedicationList';
@@ -12,15 +13,15 @@ export default function MedicationDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMedication, setEditingMedication] = useState(null);
 
-    const getAuthToken = () => localStorage.getItem('access_token');
+  const getAuthToken = () => localStorage.getItem('access_token');
+
   const fetchMedications = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/patient/medications', {
-        headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' }
+      const response = await api.get('api/patient/medications', {
+        headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' },
       });
-      const data = await response.json();
-      setMedications(data);
+      setMedications(response.data);
       setLoading(false);
     } catch (error) {
       console.error('Erreur:', error);
@@ -28,55 +29,33 @@ export default function MedicationDashboard() {
     }
   };
 
-const fetchTodayIntakes = async () => {
-  try {
-    setLoading(true);
+  const fetchTodayIntakes = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/api/patient/today-intakes', {
+        headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' },
+      });
 
-    const response = await fetch('http://localhost:8000/api/patient/today-intakes', {
-      headers: {
-        'Authorization': `Bearer ${getAuthToken()}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    // If server returned an error (404, 401, etc.)
-    if (!response.ok) {
-      const text = await response.text(); // could be HTML
-      console.error('Server returned an error:', response.status, text);
-      setTodayIntakes([]); // clear previous intakes
+      if (response.status === 200 && response.data.intakes) {
+        const formattedIntakes = response.data.intakes.map((intake) => ({
+          id: intake.intake_id,
+          medication_name: intake.medication_name,
+          dosage: intake.dosage,
+          unit: intake.unit,
+          scheduled_time: intake.scheduled_time,
+          status: intake.status,
+        }));
+        setTodayIntakes(formattedIntakes);
+      } else {
+        setTodayIntakes([]);
+      }
       setLoading(false);
-      return;
-    }
-
-    const intakes = await response.json();
-
-    if (!intakes || !intakes.intakes) {
-      console.warn('No intakes data returned', intakes);
+    } catch (error) {
+      console.error('Erreur:', error);
       setTodayIntakes([]);
       setLoading(false);
-      return;
     }
-
-    const formattedIntakes = intakes.intakes.map((intake) => ({
-      id: intake.intake_id,
-      medication_name: intake.medication_name,
-      dosage: intake.dosage,
-      unit: intake.unit,
-      scheduled_time: intake.scheduled_time,
-      status: intake.status,
-    }));
-
-    setTodayIntakes(formattedIntakes);
-    setLoading(false);
-
-  } catch (error) {
-    console.error('Fetch error:', error);
-    setTodayIntakes([]);
-    setLoading(false);
-  }
-};
-  
-
+  };
 
   useEffect(() => {
     fetchMedications();
@@ -85,32 +64,36 @@ const fetchTodayIntakes = async () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleModalSubmit = async (formData) => {
-    try {
-      const url = editingMedication 
-        ? `http://localhost:8000/api/patient/medications/${editingMedication.id}`
-        : 'http://localhost:8000/api/patient/medications';
-      
-      const method = editingMedication ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method: method,
-        headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      
-      if (response.ok) {
-        setIsModalOpen(false);
-        setEditingMedication(null);
-        fetchMedications();
-        fetchTodayIntakes();
-      } else {
-        alert(editingMedication ? 'Erreur lors de la modification du médicament' : 'Erreur lors de l\'ajout du médicament');
-      }
-    } catch (error) {
+const handleModalSubmit = async (formData) => {
+  console.log('Submitting Form Data:', formData);  // Log to check the data
+  try {
+    const url = editingMedication
+      ? `api/patient/medications/${editingMedication.id}`
+      : 'api/patient/medications';
+
+    const method = editingMedication ? 'PUT' : 'POST';
+
+    const response = await api({
+      method,
+      url,
+      headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' },
+      data: formData,
+    });
+
+    if (response.status === 200 || response.status === 201) {
+      setIsModalOpen(false);
+      setEditingMedication(null);
+      fetchMedications();
+      fetchTodayIntakes();
+    } else {
       alert(editingMedication ? 'Erreur lors de la modification du médicament' : 'Erreur lors de l\'ajout du médicament');
     }
-  };
+  } catch (error) {
+    console.error('Erreur:', error);
+    alert(editingMedication ? 'Erreur lors de la modification du médicament' : 'Erreur lors de l\'ajout du médicament');
+  }
+};
+
 
   const handleTake = async (intakeId) => {
     try {
@@ -118,26 +101,32 @@ const fetchTodayIntakes = async () => {
       const now = new Date();
       const scheduledTime = new Date(intake.scheduled_time);
       const isLate = now > scheduledTime;
-      
-      const response = await fetch(`http://localhost:8000/api/patient/medication-intakes/${intakeId}/status`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: isLate ? 'late' : 'taken', taken_time: now.toISOString() })
-      });
-      if (response.ok) fetchTodayIntakes();
+
+      const response = await api.put(
+        `api/patient/medication-intakes/${intakeId}/status`,
+        { status: isLate ? 'late' : 'taken', taken_time: now.toISOString() },
+        { headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' } }
+      );
+      if (response.status === 200) fetchTodayIntakes();
     } catch (error) {
-      console.error('Erreur:', error);
-    }
+  console.error('Erreur:', error);
+  if (error.response) {
+    console.error('Error Response:', error.response.data);
+    alert('Erreur: ' + (error.response.data.message || 'Une erreur s\'est produite'));
+  } else {
+    alert('Erreur lors de l\'ajout du médicament');
+  }
+}
+
   };
 
   const handleDelete = async (medicationId) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce médicament ?')) return;
     try {
-      const response = await fetch(`http://localhost:8000/api/patient/medications/${medicationId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' }
+      const response = await api.delete(`api/patient/medications/${medicationId}`, {
+        headers: { 'Authorization': `Bearer ${getAuthToken()}`, 'Content-Type': 'application/json' },
       });
-      if (response.ok) fetchMedications();
+      if (response.status === 200) fetchMedications();
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -155,9 +144,9 @@ const fetchTodayIntakes = async () => {
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
-      <AddMedicationModal 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
+      <AddMedicationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
         onSubmit={handleModalSubmit}
         editData={editingMedication}
       />

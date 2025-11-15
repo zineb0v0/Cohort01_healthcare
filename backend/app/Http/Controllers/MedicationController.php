@@ -21,82 +21,69 @@ class MedicationController extends Controller
     }
 
     // Ajouter un médicament
-public function store(Request $request)
-{
-    // ✅ Validation
-    $request->validate([
-        'medication_name' => 'required|string',
-        'dosage' => 'required|string',
-        'unit' => 'required|string',
-        'frequency' => 'required|integer',
-        'start_date' => 'required|date',
-        'end_date' => 'nullable|date',
-        'prescribed_by' => 'nullable|string',
-        'reminder_schedule' => 'required|array|min:1',
-        'reminder_schedule.*' => 'required|string|date_format:H:i',
-        'instructions' => 'nullable|string',
-        'possible_side_effects' => 'nullable|string',
-        'take_with_food' => 'nullable|boolean',
-        'as_needed_prn' => 'nullable|boolean',
-    ]);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'medication_name' => 'required|string',
+            'dosage' => 'required|string',
+            'unit' => 'required|string',
+            'frequency' => 'required|integer', // nombre de fois par jour
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date',
+            'prescribed_by' => 'nullable|string',
+            'reminder_schedule' => 'nullable|array', // ✅ Doit être un tableau JSON
+            'reminder_schedule.*' => 'regex:/^\d{2}:\d{2}$/', // chaque heure doit être au format HH:MM
+            'instructions' => 'nullable|string',
+            'possible_side_effects' => 'nullable|string',
+            'take_with_food' => 'boolean',
+            'as_needed_prn' => 'boolean',
+        ]);
 
-    $patient = Patient::where('user_id', $request->user()->id)->firstOrFail();
+        $patient = Patient::where('user_id', $request->user()->id)->firstOrFail();
 
-    // JSON pour DB
-    $reminderScheduleJson = json_encode($request->reminder_schedule);
+        $medication = Medication::create([
+            'id' => Str::uuid()->toString(),
+            'patient_id' => $patient->id,
+            'medication_name' => $request->medication_name,
+            'dosage' => $request->dosage,
+            'unit' => $request->unit,
+            'frequency' => $request->frequency,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'prescribed_by' => $request->prescribed_by,
+            'reminder_schedule' => $request->reminder_schedule ? json_encode($request->reminder_schedule) : json_encode(['08:00']), // ✅ JSON
+            'instructions' => $request->instructions,
+            'possible_side_effects' => $request->possible_side_effects,
+            'take_with_food' => $request->take_with_food ?? false,
+            'as_needed_prn' => $request->as_needed_prn ?? false,
+        ]);
 
-    // ✅ Create medication
-    $medication = Medication::create([
-        'id' => Str::uuid()->toString(),
-        'patient_id' => $patient->id,
-        'medication_name' => $request->medication_name,
-        'dosage' => $request->dosage,
-        'unit' => $request->unit,
-        'frequency' => $request->frequency,
-        'start_date' => $request->start_date,
-        'end_date' => $request->end_date,
-        'prescribed_by' => $request->prescribed_by,
-        'reminder_schedule' => $reminderScheduleJson,
-        'instructions' => $request->instructions,
-        'possible_side_effects' => $request->possible_side_effects,
-        'take_with_food' => $request->take_with_food ?? false,
-        'as_needed_prn' => $request->as_needed_prn ?? false,
-    ]);
+        // ✅ Générer automatiquement les prises dans medication_intakes
+        $start = Carbon::parse($medication->start_date);
+        $end = $medication->end_date ? Carbon::parse($medication->end_date) : $start;
 
-    // Générer MedicationIntakes - ONE RECORD PER REMINDER PER DAY
-    $start = Carbon::parse($medication->start_date);
-    $end = $medication->end_date ? Carbon::parse($medication->end_date) : $start->copy()->addDays(30);
-    $reminders = $request->reminder_schedule; // Array of times like ["08:00", "20:00"]
-    $current = $start->copy();
+        // Décode pour pouvoir boucler dessus
+        $reminders = json_decode($medication->reminder_schedule, true) ?? ['08:00'];
 
-    $intakesCreated = 0;
-    while ($current->lte($end)) {
-        // Create one intake record for EACH reminder time
-        foreach ($reminders as $reminderTime) {
-            // Combine date with time to create full datetime
-            $scheduledDateTime = Carbon::parse($current->format('Y-m-d') . ' ' . $reminderTime);
-
-            MedicationIntake::create([
-                'id' => Str::uuid()->toString(),
-                'patient_id' => $medication->patient_id,
-                'medication_id' => $medication->id,
-                'scheduled_time' => $scheduledDateTime, // DateTime: 2025-10-27 08:00:00
-                'taken_time' => null, // Will be filled when user marks as taken
-                'status' => 'scheduled',
-            ]);
-
-            $intakesCreated++;
+        $current = $start;
+        while ($current->lte($end)) {
+            foreach ($reminders as $time) {
+                MedicationIntake::create([
+                    'id' => Str::uuid()->toString(),
+                    'patient_id' => $medication->patient_id,
+                    'medication_id' => $medication->id,
+                    'scheduled_time' => [Carbon::parse($current->format('Y-m-d').' '.trim($time))->toDateTimeString()],
+                    'status' => ['scheduled'],
+                ]);
+            }
+            $current->addDay();
         }
 
-        $current->addDay();
+        return response()->json([
+            'message' => 'Médicament et prises générés avec succès',
+            'medication' => $medication,
+        ], 201);
     }
-
-    return response()->json([
-        'message' => 'Médicament et prises générés avec succès',
-        'medication' => $medication,
-        'intakes_created' => $intakesCreated,
-    ], 201);
-}
 
     // Mettre à jour un médicament
     public function update(Request $request, $id)

@@ -1,13 +1,20 @@
 import { useState } from "react";
 import {
-  Facebook,
-  Twitter,
-  Linkedin,
-  Instagram,
+  //   Facebook,
+  //   Twitter,
+  //   Linkedin,
+  //   Instagram,
   Mail,
   Phone,
   MapPin,
 } from "lucide-react";
+import {
+  FaFacebookF,
+  FaTwitter,
+  FaLinkedinIn,
+  FaInstagram,
+} from "react-icons/fa";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -92,13 +99,25 @@ export default function Footer() {
               Réseaux sociaux:
             </h4>
             <div className="flex items-center space-x-3 mb-9">
-              {[Facebook, Twitter, Linkedin, Instagram].map((Icon, i) => (
-                <div
+              {[
+                { Icon: FaFacebookF, link: "https://facebook.com" },
+                { Icon: FaTwitter, link: "https://twitter.com" },
+                { Icon: FaLinkedinIn, link: "https://linkedin.com" },
+                { Icon: FaInstagram, link: "https://instagram.com" },
+              ].map(({ Icon, link }, i) => (
+                <a
                   key={i}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1d3459] hover:bg-gray-200 transition"
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group w-9 h-9 flex items-center justify-center rounded-full bg-[#1d3459]         hover:scale-110
+  transition-all duration-300 ease-in-out"
                 >
-                  <Icon size={18} className="text-white" />
-                </div>
+                  <Icon
+                    size={18}
+                    className="text-white group-hover:text-[#79A1C0] transition-colors duration-300"
+                  />
+                </a>
               ))}
             </div>
           </div>

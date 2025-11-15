@@ -102,7 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Medications
         Route::apiResource('/medications', MedicationController::class);
-        Route::get('/today-intakes', [MedicationIntakeController::class, 'todayIntakes']);
+
         // Medication Intakes
         Route::get('/medication-intakes/percentages', [MedicationIntakeController::class, 'percentages']);
         Route::put('/medication-intakes/{id}/status', [MedicationIntakeController::class, 'updateStatus']);
@@ -119,7 +119,7 @@ Route::middleware('auth:sanctum')->put('/profile', function () {
         'phone' => 'string|max:20',
         'address' => 'string|max:255',
         'date_birth' => 'date',
-        'gender' => 'in:male,female',
+        'gender' => 'in:homme,femme',
         'emergency_contact' => 'nullable|string|max:20',
     ]);
 

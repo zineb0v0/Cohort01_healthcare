@@ -22,19 +22,29 @@ export default function Hero() {
   };
 
   return (
-    <div className="relative h-screen w-full">
-      {/* Animated background image */}
-      <motion.div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('bg-herosection2.png')" }}
-        variants={bgVariant}
-        initial="hidden"
-        animate="visible"
-        transition={{ duration: 1.5 }}
-      ></motion.div>
+<div className="relative md:h-screen w-full">
+  {/* Desktop background */}
+  <motion.div
+    className="hidden md:block absolute inset-0 bg-cover bg-fixed z-0 bg-center"
+    style={{ backgroundImage: "url('bg-herosection1.jpg')" }}
+    variants={bgVariant}
+    initial="hidden"
+    animate="visible"
+    transition={{ duration: 1.5 }}
+  ></motion.div>
 
-      {/* Hero content */}
-      <div className="relative mt-5 z-10 flex flex-col items-start justify-center h-full text-left px-4 sm:px-6 md:px-10 lg:px-16 max-w-full md:max-w-4xl">
+  {/* Mobile background */}
+  <motion.div
+    className="block md:hidden absolute inset-0 bg-[length:auto_500px]   bg-fixed bg-top bg-no-repeat"
+    style={{ backgroundImage: "url('bg-herosection2.jpg')" ,height: '100%'}}
+    variants={bgVariant}
+    initial="hidden"
+    animate="visible"
+    transition={{ duration: 1.5 }}
+  ></motion.div>
+
+  {/* Hero content */}
+  <div className="relative z-10 flex flex-col items-start justify-center text-left px-4 m-1  pb-10 pt-[25%] sm:px-6 md:px-10 lg:px-16 max-w-full md:max-w-4xl h-auto md:h-full md:py-0">
         {/* Heading */}
         <motion.h1
           className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-blue mb-4"

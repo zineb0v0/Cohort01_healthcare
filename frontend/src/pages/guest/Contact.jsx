@@ -106,7 +106,7 @@ export default function Contact() {
                 disabled={isSubmitting}
                 className="bg-[#002b50] text-white px-10 py-6 text-lg  rounded-md w-full transform hover:scale-102 transition-transform duration-300"
               >
-                {isSubmitting ? "Envoi..." : "Envoyer"}
+                 Envoyer
               </Button>
             </form>
           </CardContent>

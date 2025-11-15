@@ -180,13 +180,13 @@ export default function Navbar() {
 
             <Button
               variant="outline"
-              className="transform transition-transform duration-300 text-lg hover:scale-103"
+              className="transform transition-transform w-full duration-300 text-lg hover:scale-103"
               onClick={() => goToAuthentication("login")}
             >
               Se connecter
             </Button>
             <Button
-              className="bg-[#00345d]/96 text-white transform text-lg transition-transform duration-300 hover:scale-103 hover:bg-[#001f42]"
+              className="bg-[#00345d]/96 text-white transform w-full text-lg transition-transform duration-300 hover:scale-103 hover:bg-[#001f42]"
               onClick={() => goToAuthentication("register")}
             >
               Rejoindre

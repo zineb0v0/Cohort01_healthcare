@@ -18,8 +18,8 @@ return new class extends Migration {
             $table->time('time')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'canceled','completed'])->default('pending');
 
-            $table->boolean('isTelehealth')->default(false);
-            $table->string('telehealthLink')->nullable();
+            $table->boolean('is_telehealth')->default(false);
+            $table->string('telehealth_url')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

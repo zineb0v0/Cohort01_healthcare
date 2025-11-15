@@ -14,7 +14,7 @@ class NotificationController extends Controller
     {
         // Récupérer le patient connecté via la relation user->patient
         $patient = $request->user()->patient;
-        
+
         if (!$patient) {
             return response()->json(['message' => 'Patient not found'], 404);
         }
@@ -41,7 +41,7 @@ class NotificationController extends Controller
     public function markAsRead(Request $request, $id): JsonResponse
     {
         $patient = $request->user()->patient;
-        
+
         if (!$patient) {
             return response()->json(['message' => 'Patient not found'], 404);
         }
@@ -55,7 +55,7 @@ class NotificationController extends Controller
     public function markAllAsRead(Request $request): JsonResponse
     {
         $patient = $request->user()->patient;
-        
+
         if (!$patient) {
             return response()->json(['message' => 'Patient not found'], 404);
         }
@@ -70,7 +70,7 @@ class NotificationController extends Controller
     public function unreadCount(Request $request): JsonResponse
     {
         $patient = $request->user()->patient;
-        
+
         if (!$patient) {
             return response()->json(['message' => 'Patient not found'], 404);
         }

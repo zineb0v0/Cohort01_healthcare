@@ -18,9 +18,8 @@ class Collaborator extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     protected $casts = [
-    'availability' => 'boolean',
-];
-
+        'availability' => 'boolean',
+    ];
 
     protected $fillable = [
         'id',
@@ -30,7 +29,7 @@ class Collaborator extends Model
         'workplace',
         'isAvailable',
         'availability',
-        'rating'
+        'rating',
     ];
 
     protected $dates = ['deleted_at'];

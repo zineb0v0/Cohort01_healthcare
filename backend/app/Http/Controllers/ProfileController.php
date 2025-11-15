@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -18,5 +17,5 @@ class ProfileController extends Controller
         ];
 
         return response()->json($data);
-    }   
+    }
 }

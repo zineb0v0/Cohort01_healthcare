@@ -1,5 +1,5 @@
 import { Clock } from 'lucide-react';
-import MedicationItem from './Medicationltem';
+import MedicationItem from './MedicationItem';
 
 export default function TodaysMedicationsCard({ medications, onTakeNow, loading }) {
   if (loading) {

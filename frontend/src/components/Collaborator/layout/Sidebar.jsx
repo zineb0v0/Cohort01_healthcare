@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FaSignOutAlt,
   FaHome,
@@ -8,28 +8,12 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
-import api from "../../../lib/axios";
 import toast from "react-hot-toast";
-export default function Sidebar() {
-  const [profile, setProfile] = useState(null);
+import api from "../../../lib/axios";
+
+export default function Sidebar({ profile }) {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-
-  // Charger le profil du collaborateur
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem("access_token");
-        const res = await api.get("/api/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setProfile(res.data);
-      } catch (err) {
-        console.error("Erreur lors du chargement du profil:", err);
-      }
-    };
-    fetchProfile();
-  }, []);
 
   // Déconnexion
   const handleLogout = async () => {
@@ -71,27 +55,19 @@ export default function Sidebar() {
         ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
         {/* 🔸 Logo toujours visible */}
-        <div className=" p-0 lg:p-5 border-b border-gray-200 flex justify-center lg:justify-start">
+        <div className="p-0 lg:p-5 border-b border-gray-200 flex justify-center lg:justify-start">
           <img src="/logo1.webp" alt="Logo Echo" className="h-16" />
         </div>
 
         {/* 🔹 Navigation */}
-        <nav className=" pb-20 lg:pb-40 space-y-2">
-          <SidebarLink
-            to="/collaborator"
-            icon={<FaHome />}
-            label="Tableau de bord"
-          />
+        <nav className="pb-70 lg:pb-40 space-y-2">
+          <SidebarLink to="/collaborator" icon={<FaHome />} label="Tableau de bord" />
           <SidebarLink
             to="/collaborator/rendezvous"
             icon={<FaCalendarAlt />}
             label="Rendez-vous"
           />
-          <SidebarLink
-            to="/collaborator/profile"
-            icon={<FaUser />}
-            label="Profil"
-          />
+          <SidebarLink to="/collaborator/profile" icon={<FaUser />} label="Profil" />
         </nav>
 
         {/* 🔹 Infos utilisateur */}
